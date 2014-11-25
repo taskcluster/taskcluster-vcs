@@ -14,7 +14,7 @@ suite('detect', function() {
   }
 
   test('hg - bit bucket', co(function* () {
-    yield check('bitbucket.org/durin42/hg-git', 'hg');
+    yield check('bitbucket.org/lightsofapollo/hgtesting', 'hg');
   }));
 
   test('hg - mozilla central', co(function* () {
