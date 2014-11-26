@@ -4,5 +4,5 @@ module.exports = function (args) {
     __dirname + '/../../bin/tc-vcs', '-c', __dirname + '/config.yml'
   ].concat(args);
 
-  return exec(argv.join(' '));
+  return exec(argv.join(' '), { env: process.env });
 };
