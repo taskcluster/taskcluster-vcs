@@ -54,6 +54,9 @@ function main(argv) {
   var config = loadConfig(args[0].config);
 
   switch (argv[0]) {
+    case 'checkout-revision':
+      cli('checkout-revision', config, argv);
+      break;
     case 'revision':
       cli('revision', config, argv);
       break;
