@@ -2,3 +2,20 @@
 # passing the config you wish to use over the command line...
 git: git
 hg: hg
+
+cloneCache:
+  # Useful in the edge case where you want to disable cache.
+  enabled: true
+  # The root where all downloaded cache files are stored on the local machine...
+  cacheDir: '{{env.HOME}}/.tc-vcs/'
+  # Large http get requests are often slower using nodes built in http layer so
+  # we utilize a subprocess which is responsible for fetching...
+  get: curl --retry 5 -o {{dest}} {{url}}
+  # All cache urls use tar + gz this is the command used to extract those files
+  # downloaded by the "get" command.
+  extract: tar -x -z --strip-components 1 -C {{dest}} -f {{source}}
+  # Name/prefixed used as part of the base url.
+  cacheName: clones/{{name}}.tar.gz
+  # The baseUrl is used when cloning if there is a appropriate object.
+  baseUrl: https://s3-us-west-2.amazonaws.com/taskcluster-sources/{{cacheName}}
+

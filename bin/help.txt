@@ -22,9 +22,6 @@ Commands:
 
 Configuration (yaml file):
 
-Example File:
-
-# Override git
-git: /your/git
-# Override hg
-hg: /your/hg
+To provide a greater degree of flexibility there is the option of passing a
+config file the default values (and docs) are in (tc-vcs
+root)/default_config.yml
