@@ -1,0 +1,28 @@
+usage: tc-vcs <command>
+
+tc-vcs: {{version}}
+
+This cli is designed to abstract the differences between hg/git and deal with
+higher level concepts such as applying a set of changes from one repository unto
+another and using various types of caches (s3 copies of entire clones) to speed
+up downloads based on where your machine lives.
+
+Global options:
+
+  --help : show this help message
+  --config <path> : Override default configuration with a yaml file (see
+                    Configuration)
+
+Commands:
+
+  clone : Determines the VCS in use and attempts to use caches prior to
+          fetching.
+
+Configuration (yaml file):
+
+Example File:
+
+# Override git
+git: /your/git
+# Override hg
+hg: /your/hg

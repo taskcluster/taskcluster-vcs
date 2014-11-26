@@ -1,0 +1,4 @@
+# Default configuration used by the tc-vs tools these can be overridden by
+# passing the config you wish to use over the command line...
+git: git
+hg: hg

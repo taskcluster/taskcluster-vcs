@@ -1,0 +1,54 @@
+#! /usr/bin/env node
+
+var fs = require('fs');
+var fsPath = require('path');
+var yaml = require('js-yaml');
+var ArgumentParser = require('argparse').ArgumentParser;
+
+function help() {
+  var mustache = require('mustache');
+  var content = fs.readFileSync(__dirname + '/help.txt', 'utf8');
+
+  console.log(mustache.render(content, {
+    'version': require('../package.json').version
+  }));
+}
+
+function cli(name, config, argv) {
+  require('../cli/' + name)(config, argv.slice(1));
+}
+
+function main(argv) {
+  var parser = new ArgumentParser({
+    addHelp: false,
+    version: require('../package.json').version
+  });
+
+  parser.addArgument(['-c', '--config'], {
+    defaultValue: __dirname + '/../default_config.yml',
+    type: function(value) {
+      return yaml.safeLoad(fs.readFileSync(fsPath.resolve(value), 'utf8'));
+    }
+  });
+
+  parser.addArgument(['-h', '--help'], {
+    action: 'storeTrue',
+    help: 'Show help and usage...'
+  });
+
+  var args = parser.parseKnownArgs();
+  var argv = args[1];
+
+  switch (argv[0]) {
+    case 'clone':
+      cli('clone', args[0].config, argv);
+      break;
+    case 'help':
+    default:
+      help();
+      return;
+  }
+}
+
+main(process.argv);
+

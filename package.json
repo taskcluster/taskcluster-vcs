@@ -1,0 +1,38 @@
+{
+  "name": "tc-vcs",
+  "version": "0.0.0",
+  "description": "## Strategy",
+  "main": "test.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/lightsofapollo/tc-vcs.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/lightsofapollo/tc-vcs/issues"
+  },
+  "homepage": "https://github.com/lightsofapollo/tc-vcs",
+  "dependencies": {
+    "argparse": "^0.1.15",
+    "bluebird": "^2.3.11",
+    "graceful-fs": "^3.0.4",
+    "js-yaml": "^3.2.3",
+    "mustache": "^0.8.2",
+    "mz": "^1.1.0",
+    "object-assign": "^2.0.0",
+    "promise": "^6.0.1",
+    "superagent": "^0.21.0",
+    "superagent-promise": "^0.2.0",
+    "tar-fs": "^1.3.0",
+    "tar-stream": "^1.1.1",
+    "url-join": "0.0.1"
+  },
+  "devDependencies": {
+    "co": "^3.0.0",
+    "mocha": "^2.0.1"
+  }
+}
