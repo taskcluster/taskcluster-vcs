@@ -1,1 +1,1 @@
---ui tdd --timeout 20s
+--ui tdd --timeout 20s test/helper
