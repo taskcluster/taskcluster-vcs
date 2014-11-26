@@ -1,3 +1,4 @@
+var Promise = require('promise');
 var fs = require('mz/fs');
 var assert = require('assert');
 
