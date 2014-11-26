@@ -4,8 +4,6 @@ git: git
 hg: hg
 
 cloneCache:
-  # Useful in the edge case where you want to disable cache.
-  enabled: true
   # The root where all downloaded cache files are stored on the local machine...
   cacheDir: '{{env.HOME}}/.tc-vcs/'
   # Large http get requests are often slower using nodes built in http layer so

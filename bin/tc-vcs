@@ -1,9 +1,23 @@
 #! /usr/bin/env node
 
+var ArgumentParser = require('argparse').ArgumentParser;
+
+var assign = require('object-assign');
 var fs = require('fs');
 var fsPath = require('path');
 var yaml = require('js-yaml');
-var ArgumentParser = require('argparse').ArgumentParser;
+var deap = require('deap');
+
+function loadConfig(userConfig) {
+  var defaults = yaml.safeLoad(fs.readFileSync(
+    __dirname + '/../default_config.yml', 'utf8'
+  ));
+
+  if (!userConfig) {
+    return defaults;
+  }
+  return deap(defaults, userConfig);
+}
 
 function help() {
   var mustache = require('mustache');
@@ -25,7 +39,6 @@ function main(argv) {
   });
 
   parser.addArgument(['-c', '--config'], {
-    defaultValue: __dirname + '/../default_config.yml',
     type: function(value) {
       return yaml.safeLoad(fs.readFileSync(fsPath.resolve(value), 'utf8'));
     }
@@ -38,13 +51,14 @@ function main(argv) {
 
   var args = parser.parseKnownArgs();
   var argv = args[1];
+  var config = loadConfig(args[0].config);
 
   switch (argv[0]) {
     case 'revision':
-      cli('revision', args[0].config, argv);
+      cli('revision', config, argv);
       break;
     case 'clone':
-      cli('clone', args[0].config, argv);
+      cli('clone', config, argv);
       break;
     case 'help':
     default:
