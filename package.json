@@ -12,14 +12,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/lightsofapollo/tc-vcs.git"
+    "url": "git://github.com/lightsofapollo/taskcluster-vcs.git"
   },
   "author": "James Lal [:lightsofapollo]",
   "license": "Apache2",
   "bugs": {
-    "url": "https://github.com/lightsofapollo/tc-vcs/issues"
+    "url": "https://github.com/lightsofapollo/taskcluster-vcs/issues"
   },
-  "homepage": "https://github.com/lightsofapollo/tc-vcs",
+  "homepage": "https://github.com/lightsofapollo/taskcluster-vcs",
   "dependencies": {
     "argparse": "^0.1.15",
     "bluebird": "^2.3.11",
