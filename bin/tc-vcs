@@ -40,6 +40,9 @@ function main(argv) {
   var argv = args[1];
 
   switch (argv[0]) {
+    case 'revision':
+      cli('revision', args[0].config, argv);
+      break;
     case 'clone':
       cli('clone', args[0].config, argv);
       break;

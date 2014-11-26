@@ -18,6 +18,8 @@ Commands:
   clone : Determines the VCS in use and attempts to use caches prior to
           fetching.
 
+  revision : Output the current revision of a repository.
+
 Configuration (yaml file):
 
 Example File:
