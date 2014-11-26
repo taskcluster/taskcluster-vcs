@@ -23,7 +23,7 @@ suite('clone', function() {
     ]);
     assert((yield fs.exists(dest)), 'path exists');
     var rev = yield run(['revision', dest]);
-    assert.equal(rev[0], '64050d1ea4bc052aef9352c46bef397974bcb1f4');
+    assert.equal(rev[0], '5d3acb7ef08f1c988b6f34ade72718a10a6ac123');
   }));
 
   test('git', co(function* () {

@@ -6,21 +6,38 @@ The goal is to provide a moderately normalized clone/reset/checkout strategy for
 both hg and git. Additionally where possible use caches (on s3) instead
 of direct clones.
 
-### Clone
+## Usage:
+
+This package has a somewhat stable internal interface (see /vcs) but it
+is primarily designed to be used as a CLI.
 
 ```sh
-tc-vcs clone <url>
+npm install taskcluster-vcs -g
+tc-vcs --help
 ```
 
-We do a set of checks for clones that looks like this:
+## Developing:
 
- - check for a cached version of this url
+### Directory Structure:
 
- - if no cached version determine what kind of resource this is
-    - if <url> starts /w ssh convert to https for detection.
-    - concurrently run
-      - <url>?cmd=lookup&key=0 (if this is hg content-type will contain "mercurial")
-      - https://github.com/git/git/blob/398dd4bd039680ba98497fbedffa415a43583c16/Documentation/technical/http-protocol.txt#L199 (for git)
-    - Run git or hg clone based on http server response
- - else
-    - copy from s3
+  - bin/tc-vcs : Primary entrypoint.
+  - cli/       : Individual CLI sub commands.
+  - test/      : Tests for tc-vcs
+  - vcs/       : Internal version control abstractions for hg/git
+
+## Tests
+
+The tests require node 0.11x or greater and make heavy use of
+generators/co this is only required for tests.
+
+```sh
+# Run all the tests
+npm install
+
+# Run one test
+./test/test.sh <test>
+```
+
+## LICENSE
+
+See [./LICENSE](LICENSE)
