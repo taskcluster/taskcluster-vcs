@@ -1,17 +1,18 @@
 {
   "name": "tc-vcs",
   "version": "0.0.0",
-  "description": "## Strategy",
-  "main": "test.js",
+  "description": "Version control tools for taskcluster images",
+  "main": "bin/tc-vcs",
+  "preferGlobal": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "./test/test.sh $(find test -name '*_test.js')"
   },
   "repository": {
     "type": "git",
     "url": "git://github.com/lightsofapollo/tc-vcs.git"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "James Lal [:lightsofapollo]",
+  "license": "Apache2",
   "bugs": {
     "url": "https://github.com/lightsofapollo/tc-vcs/issues"
   },
