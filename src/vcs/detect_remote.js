@@ -1,8 +1,8 @@
-var URL = require('url');
-var request = require('superagent-promise');
-var urlJoin = require('url-join');
+let URL = require('url');
+let request = require('superagent-promise');
+let urlJoin = require('url-join');
 
-var Promise = require('promise');
+let Promise = require('promise');
 
 /**
 -> <url>?cmd=lookup&key=0 (if this is hg content-type will contain "mercurial")
@@ -17,10 +17,10 @@ See https://github.com/git/git/blob/398dd4bd039680ba98497fbedffa415a43583c16/Doc
 For the exact logic used here...
 */
 function detectGit(url) {
-  var location = urlJoin(url, '/info/refs?service=git-upload-pack');
+  let location = urlJoin(url, '/info/refs?service=git-upload-pack');
 
   // XXX: get is used so we correctly follow redirects...
-  var req = request.get(location);
+  let req = request.get(location);
 
   // Trick github/etc... Into thinking we are are a git client.
   req.set('User-Agent', 'git/2.0.1');
@@ -42,7 +42,7 @@ function detectGit(url) {
 }
 
 function detectHg(url) {
-  var location = urlJoin(url, '?cmd=lookup&key=0');
+  let location = urlJoin(url, '?cmd=lookup&key=0');
 
   return request.head(location).end().then(function(res) {
     if (res.error) throw res.error;
@@ -60,8 +60,8 @@ function detectHg(url) {
 
 function firstSuccess(promises) {
   return new Promise(function(accept, reject) {
-    var err;
-    var pending = promises.length;
+    let err;
+    let pending = promises.length;
 
     promises.forEach(function(p) {
       p.then(accept, function(_err) {
@@ -73,7 +73,7 @@ function firstSuccess(promises) {
 }
 
 function detect(url) {
-  var components = URL.parse(url);
+  let components = URL.parse(url);
 
   // In the case of ssh endpoint convert to https which in most cases will
   // also work but provide an api which we can query...
@@ -81,7 +81,7 @@ function detect(url) {
     components.protocol = 'https:'
   }
 
-  location = URL.format(components);
+  let location = URL.format(components);
 
   // Now we race for the _first_ successful response otherwise we throw an
   // error.

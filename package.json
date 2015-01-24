@@ -8,6 +8,7 @@
     "tc-vcs": "./bin/tc-vcs"
   },
   "scripts": {
+    "prepublish": "6to5 -s -e src --out-dir build",
     "test": "./test/test.sh $(find test -name '*_test.js')"
   },
   "repository": {
@@ -21,6 +22,7 @@
   },
   "homepage": "https://github.com/lightsofapollo/taskcluster-vcs",
   "dependencies": {
+    "6to5": "^2.13.7",
     "argparse": "^0.1.15",
     "bluebird": "^2.3.11",
     "deap": "^1.0.0",

@@ -1,16 +1,17 @@
 #! /usr/bin/env node
 
-var ArgumentParser = require('argparse').ArgumentParser;
+// Polyfill is required for async operations and other es6 features.
+import '6to5/polyfill';
 
-var assign = require('object-assign');
-var fs = require('fs');
-var fsPath = require('path');
-var yaml = require('js-yaml');
-var deap = require('deap');
+import { ArgumentParser } from 'argparse';
+import fs from 'fs';
+import fsPath from 'path';
+import yaml from 'js-yaml';
+import deap from 'deap';
 
 function loadConfig(userConfig) {
-  var defaults = yaml.safeLoad(fs.readFileSync(
-    __dirname + '/../default_config.yml', 'utf8'
+  let defaults = yaml.safeLoad(fs.readFileSync(
+    __dirname + '/../../default_config.yml', 'utf8'
   ));
 
   if (!userConfig) {
@@ -20,11 +21,11 @@ function loadConfig(userConfig) {
 }
 
 function help() {
-  var mustache = require('mustache');
-  var content = fs.readFileSync(__dirname + '/help.txt', 'utf8');
+  let mustache = require('mustache');
+  let content = fs.readFileSync(__dirname + '/help.txt', 'utf8');
 
   console.log(mustache.render(content, {
-    'version': require('../package.json').version
+    'version': require('../../package.json').version
   }));
 }
 
@@ -33,9 +34,9 @@ function cli(name, config, argv) {
 }
 
 function main(argv) {
-  var parser = new ArgumentParser({
+  let parser = new ArgumentParser({
     addHelp: false,
-    version: require('../package.json').version
+    version: require('../../package.json').version
   });
 
   parser.addArgument(['-c', '--config'], {
@@ -49,9 +50,9 @@ function main(argv) {
     help: 'Show help and usage...'
   });
 
-  var args = parser.parseKnownArgs();
-  var argv = args[1];
-  var config = loadConfig(args[0].config);
+  let args = parser.parseKnownArgs();
+  let argv = args[1];
+  let config = loadConfig(args[0].config);
 
   switch (argv[0]) {
     case 'checkout-revision':

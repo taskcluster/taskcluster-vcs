@@ -104,7 +104,7 @@ function cacheExtract(config, source, dest) {
 module.exports = function main(config, argv) {
   var parser = new ArgumentParser({
     prog: 'tc-vcs clone',
-    version: require('../package').version,
+    version: require('../../package').version,
     addHelp: true,
     description: 'issue clone to correct vcs type'
   });

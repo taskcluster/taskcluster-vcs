@@ -4,7 +4,7 @@ var detect = require('../vcs/detect_local');
 module.exports = function main(config, argv) {
   var parser = new ArgumentParser({
     prog: 'tc-vcs checkout-revision',
-    version: require('../package').version,
+    version: require('../../package').version,
     addHelp: true,
     description: 'Checkout a revision (potentially from a remote)'
   });

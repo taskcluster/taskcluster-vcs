@@ -1,6 +1,6 @@
 suite('detect', function() {
   var assert = require('assert');
-  var detect = require('../vcs/detect_remote');
+  var detect = require('../src/vcs/detect_remote');
   var co = require('co');
 
   function* check (baseUrl, type) {
