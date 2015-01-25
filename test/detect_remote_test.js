@@ -1,32 +1,31 @@
+import assert from 'assert';
+import detect from '../src/vcs/detect_remote';
+
+
 suite('detect', function() {
-  var assert = require('assert');
-  var detect = require('../vcs/detect_remote');
-  var co = require('co');
+  async function check (baseUrl, type) {
+    let [ssh, https] = await Promise.all([
+      detect('ssh://' + baseUrl),
+      detect('https://' + baseUrl)
+    ])
 
-  function* check (baseUrl, type) {
-    var results = yield {
-      ssh: detect('ssh://' + baseUrl),
-      https: detect('https://' + baseUrl)
-    };
-
-    assert.equal(results.https.type, type, 'when given https://');
-    assert.equal(results.ssh.type, type, 'when given ssh://');
+    assert.equal(https.type, type, 'when given https://');
+    assert.equal(ssh.type, type, 'when given ssh://');
   }
 
-  test('hg - bit bucket', co(function* () {
-    yield check('bitbucket.org/lightsofapollo/hgtesting', 'hg');
-  }));
+  test('hg - bit bucket', async function () {
+    await check('bitbucket.org/lightsofapollo/hgtesting', 'hg');
+  });
 
-  test('hg - mozilla central', co(function* () {
-    yield check('hg.mozilla.org/mozilla-central', 'hg');
-  }));
+  test('hg - mozilla central', async function () {
+    await check('hg.mozilla.org/mozilla-central', 'hg');
+  });
 
-  test('git - github', co(function* () {
-    yield check('github.com/mozilla-b2g/gaia', 'git');
-  }));
+  test('git - github', async function () {
+    await check('github.com/mozilla-b2g/gaia', 'git');
+  });
 
-  test('git - mozilla-central', co(function* () {
-    yield check('git.mozilla.org/releases/gecko', 'git');
-  }));
-
+  test('git - mozilla-central', async function () {
+    await check('git.mozilla.org/releases/gecko', 'git');
+  });
 });

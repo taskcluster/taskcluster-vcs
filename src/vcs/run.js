@@ -1,13 +1,11 @@
-var spawn = require('child_process').spawn;
-var util = require('util');
-var Promise = require('promise');
-var assign = require('object-assign');
+import { spawn } from 'child_process';
+import util from 'util';
 
 /**
 Wrapper around process spawning with extra logging.
 */
 function run(bin, args, opts) {
-  var proc = spawn(bin, args, assign({ stdio: 'inherit' }, opts));
+  var proc = spawn(bin, args, Object.assign({ stdio: 'inherit' }, opts));
   var start = Date.now();
   var cmd = [bin].concat(args).join(' ');
   console.log('[tc-vcs] run start : %s', cmd);

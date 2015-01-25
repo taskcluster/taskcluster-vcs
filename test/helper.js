@@ -1,11 +1,9 @@
-var co = require('co');
+suiteSetup(async function () {
+  await require('./integration/rm_cache')();
+});
 
-suiteSetup(co(function* () {
-  yield require('./integration/rm_cache')();
-}));
-
-suiteTeardown(co(function* () {
-  yield require('./integration/rm_cache')();
-}));
+suiteTeardown(async function () {
+  await require('./integration/rm_cache')();
+});
 
 process.env['TC_VCS_HOME'] = __dirname + '/cache/';

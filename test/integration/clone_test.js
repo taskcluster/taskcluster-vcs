@@ -1,64 +1,64 @@
-suite('clone', function() {
-  var co = require('co');
-  var rm = require('./rm');
-  var run = require('./run');
-  var fs = require('mz/fs');
-  var assert = require('assert');
-  var mkdirp = require('mkdirp');
+import rm from './rm';
+import run from './run';
+import fs from 'mz/fs';
+import assert from 'assert';
+import mkdirp from 'mkdirp';
 
-  function* clean() {
-    yield [rm('./clones/')]
+suite('clone', function() {
+  async function clean() {
+    await rm('./clones/');
     mkdirp.sync(__dirname + '/clones');
   }
 
-  teardown(co(clean));
-  setup(co(clean));
+  teardown(clean);
+  setup(clean);
 
-  test('hg', co(function* () {
-    var dest = __dirname + '/clones/hg';
-    var out = yield run([
+  test('hg', async function() {
+    let dest = __dirname + '/clones/hg';
+    let out = await run([
       'clone',
       'https://bitbucket.org/lightsofapollo/hgtesting',
       dest
     ]);
-    assert((yield fs.exists(dest)), 'path exists');
-    var rev = yield run(['revision', dest]);
+    assert((await fs.exists(dest)), 'path exists');
+    let rev = await run(['revision', dest]);
     assert.equal(rev[0], '5d3acb7ef08f1c988b6f34ade72718a10a6ac123');
-  }));
+  });
 
-  test('git', co(function* () {
-    var dest = __dirname + '/clones/git';
-    yield run([
+  test('git', async function () {
+    let dest = __dirname + '/clones/git';
+    await run([
       'clone',
       'https://bitbucket.org/lightsofapollo/gittesting',
       dest
     ]);
-    assert((yield fs.exists(dest)), 'path exists');
-    var rev = yield run(['revision', dest]);
+    assert((await fs.exists(dest)), 'path exists');
+    let rev = await run(['revision', dest]);
     assert.equal(rev[0], '3d8bd58cddfa558b78e947ed04ad8f9a3359ed73');
-  }));
+  });
 
-  test('cached', co(function* () {
-    function* testCache (dest) {
-      yield run([
+  test('cached', async function () {
+    async function testCache (dest) {
+      await run([
         'clone',
         'https://github.com/lightsofapollo/tc-vcs-cache',
         dest
       ]);
-      assert((yield fs.exists(dest)), 'path exists');
-      var rev = yield run(['revision', dest]);
+
+      assert((await fs.exists(dest)), 'path exists');
+      let rev = await run(['revision', dest]);
       // The important thing here is this is _not_ the latest commit but the
       // commit I manually stashed in s3.
       assert.equal(rev[0], 'a2685cb85c46d57c3698e882871db52a8288e0bb');
-      var cachePath = __dirname + '/../cache/' +
+      let cachePath = __dirname + '/../cache/' +
                       'clones/github.com/lightsofapollo/tc-vcs-cache.tar.gz';
 
-      assert.ok((yield fs.exists(cachePath)), 'cache was correctly downloaded');
+      assert.ok((await fs.exists(cachePath)), 'cache was correctly downloaded');
     }
 
     // Run and rerun the cache a few times to see what happens!
-    yield testCache(__dirname + '/clones/cache-1');
-    yield testCache(__dirname + '/clones/cache-2');
-    yield testCache(__dirname + '/clones/cache-3');
-  }));
+    await testCache(__dirname + '/clones/cache-1');
+    await testCache(__dirname + '/clones/cache-2');
+    await testCache(__dirname + '/clones/cache-3');
+  });
 });
