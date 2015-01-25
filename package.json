@@ -2,10 +2,10 @@
   "name": "taskcluster-vcs",
   "version": "0.0.2",
   "description": "Version control tools for taskcluster images",
-  "main": "bin/tc-vcs",
+  "main": "./build/bin/tc-vcs",
   "preferGlobal": true,
   "bin": {
-    "tc-vcs": "./bin/tc-vcs"
+    "tc-vcs": "./build/bin/tc-vcs.js"
   },
   "scripts": {
     "prepublish": "6to5 -s -e src --out-dir build",

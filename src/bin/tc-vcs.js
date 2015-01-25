@@ -22,7 +22,7 @@ function loadConfig(userConfig) {
 
 function help() {
   let mustache = require('mustache');
-  let content = fs.readFileSync(__dirname + '/help.txt', 'utf8');
+  let content = fs.readFileSync(__dirname + '/../../src/bin/help.txt', 'utf8');
 
   console.log(mustache.render(content, {
     'version': require('../../package.json').version
