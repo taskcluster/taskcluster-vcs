@@ -6,7 +6,7 @@ export default async function(args) {
 
   let argv = [
     '-r',
-    __dirname + '/../../src/bin/tc-vcs', '-c', __dirname + '/config.yml'
+    __dirname + '/../../src/bin/tc-vcs.js', '-c', __dirname + '/config.yml'
   ].concat(args);
 
   let proc = spawn(binary, argv, {

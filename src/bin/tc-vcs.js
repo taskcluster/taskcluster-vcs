@@ -9,6 +9,12 @@ import fsPath from 'path';
 import yaml from 'js-yaml';
 import deap from 'deap';
 
+const ACTION_DIR = fsPath.join(__dirname, '..', 'cli');
+const ACTIONS = fs.readdirSync(ACTION_DIR).reduce((initial, cli) => {
+  initial[cli.replace('.js', '')] = fsPath.join(ACTION_DIR, cli);
+  return initial;
+}, {});
+
 function loadConfig(userConfig) {
   let defaults = yaml.safeLoad(fs.readFileSync(
     __dirname + '/../../default_config.yml', 'utf8'
@@ -30,7 +36,7 @@ function help() {
 }
 
 function cli(name, config, argv) {
-  require('../cli/' + name)(config, argv.slice(1)).catch((err) => {
+  require(name)(config, argv).catch((err) => {
     if (err) {
       setTimeout(() => {
         throw err;
@@ -56,25 +62,31 @@ function main(argv) {
     help: 'Show help and usage...'
   });
 
-  let args = parser.parseKnownArgs();
-  let argv = args[1];
+  let rootArgs = [];
+  let command = 'help';
+  let commandArgs = [];
+
+  let idx = -1;
+  for (let arg of process.argv) {
+    // keep track of the index position...
+    idx++;
+    // keep reading initial args until we see a sub command
+    if (ACTIONS[arg]) {
+      command = arg;
+      commandArgs = process.argv.slice(idx + 1);
+      break;
+    }
+    rootArgs.push(arg);
+  }
+
+  let args = parser.parseKnownArgs(rootArgs);
   let config = loadConfig(args[0].config);
 
-  switch (argv[0]) {
-    case 'checkout-revision':
-      cli('checkout-revision', config, argv);
-      break;
-    case 'revision':
-      cli('revision', config, argv);
-      break;
-    case 'clone':
-      cli('clone', config, argv);
-      break;
-    case 'help':
-    default:
-      help();
-      return;
+  if (ACTIONS[command]) {
+    return cli(ACTIONS[command], config, commandArgs);
   }
+
+  help();
 }
 
 main(process.argv);
