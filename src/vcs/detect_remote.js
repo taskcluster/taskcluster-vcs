@@ -1,8 +1,6 @@
-let URL = require('url');
-let request = require('superagent-promise');
-let urlJoin = require('url-join');
-
-let Promise = require('promise');
+import URL from 'url';
+import request from 'superagent-promise';
+import urlJoin from 'url-join';
 
 /**
 -> <url>?cmd=lookup&key=0 (if this is hg content-type will contain "mercurial")
@@ -16,7 +14,7 @@ See https://github.com/git/git/blob/398dd4bd039680ba98497fbedffa415a43583c16/Doc
 
 For the exact logic used here...
 */
-function detectGit(url) {
+async function detectGit(url) {
   let location = urlJoin(url, '/info/refs?service=git-upload-pack');
 
   // XXX: get is used so we correctly follow redirects...
@@ -26,36 +24,33 @@ function detectGit(url) {
   req.set('User-Agent', 'git/2.0.1');
   req.buffer(false);
 
-  return req.end().then(function(res) {
-    if (res.error) throw res.error;
-    if (
-      res.headers['content-type'] &&
-      res.headers['content-type'].indexOf('x-git') !== -1
-    ) {
-      // XXX: Because this is a "get" request we abort here to ensure we only
-      // fetch the data we needed then stop closely after...
-      res.req.abort();
-      return { type: 'git', url: location };
-    }
-    throw new Error(url + ' is not a git url');
-  });
+  let res = await req.end();
+  if (res.error) throw res.error;
+  if (
+    res.headers['content-type'] &&
+    res.headers['content-type'].indexOf('x-git') !== -1
+  ) {
+    // XXX: Because this is a "get" request we abort here to ensure we only
+    // fetch the data we needed then stop closely after...
+    res.req.abort();
+    return { type: 'git', url: location };
+  }
+  throw new Error(url + ' is not a git url');
 }
 
-function detectHg(url) {
+async function detectHg(url) {
   let location = urlJoin(url, '?cmd=lookup&key=0');
-
-  return request.head(location).end().then(function(res) {
-    if (res.error) throw res.error;
-    if (
-      // we must have a content type
-      res.headers['content-type'] &&
-      // and it must contain mercurial
-      res.headers['content-type'].indexOf('mercurial') !== -1
-    ) {
-      return { type: 'hg', url: location };
-    }
-    throw new Error(url + ' is not a hg url');
-  });
+  let res = await request.head(location).end();
+  if (res.error) throw res.error;
+  if (
+    // we must have a content type
+    res.headers['content-type'] &&
+    // and it must contain mercurial
+    res.headers['content-type'].indexOf('mercurial') !== -1
+  ) {
+    return { type: 'hg', url: location };
+  }
+  throw new Error(url + ' is not a hg url');
 }
 
 function firstSuccess(promises) {
@@ -72,7 +67,7 @@ function firstSuccess(promises) {
   });
 }
 
-function detect(url) {
+export default async function detect(url) {
   let components = URL.parse(url);
 
   // In the case of ssh endpoint convert to https which in most cases will
@@ -85,10 +80,8 @@ function detect(url) {
 
   // Now we race for the _first_ successful response otherwise we throw an
   // error.
-  return firstSuccess([
+  return await firstSuccess([
     detectHg(location),
     detectGit(location)
   ]);
 }
-
-module.exports = detect;

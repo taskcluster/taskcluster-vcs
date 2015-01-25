@@ -1,8 +1,8 @@
-var ArgumentParser = require('argparse').ArgumentParser;
-var detect = require('../vcs/detect_local');
+import { ArgumentParser } from 'argparse';
+import detect from '../vcs/detect_local'
 
-module.exports = function main(config, argv) {
-  var parser = new ArgumentParser({
+export default async function main(config, argv) {
+  let parser = new ArgumentParser({
     prog: 'tc-vcs checkout-revision',
     version: require('../../package').version,
     addHelp: true,
@@ -25,17 +25,9 @@ module.exports = function main(config, argv) {
     help: 'revision'
   });
 
-  var args = parser.parseArgs(argv);
-
-  detect(args.path)
-    .then(function(vcsConfig) {
-      var module = require('../vcs/' + vcsConfig.type);
-      var revision = new module.CheckoutRevision(config);
-      return revision.run(args.path, args.repository, args.ref, args.revision);
-    })
-    .catch(function(e){
-      process.nextTick(function() {
-        throw e;
-      });
-    });
+  let args = parser.parseArgs(argv);
+  let vcsConfig = await detect(args.path);
+  let module = require('../vcs/' + vcsConfig.type);
+  let revision = new module.CheckoutRevision(config);
+  await revision.run(args.path, args.repository, args.ref, args.revision);
 }

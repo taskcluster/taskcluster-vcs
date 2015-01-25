@@ -30,7 +30,13 @@ function help() {
 }
 
 function cli(name, config, argv) {
-  require('../cli/' + name)(config, argv.slice(1));
+  require('../cli/' + name)(config, argv.slice(1)).catch((err) => {
+    if (err) {
+      setTimeout(() => {
+        throw err;
+      });
+    }
+  });
 }
 
 function main(argv) {

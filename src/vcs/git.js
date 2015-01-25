@@ -1,49 +1,33 @@
-var assign = require('object-assign');
-var run = require('./run');
-var exec = require('mz/child_process').exec;
-var createCommand = require('./command');
+import run from './run';
+import { exec } from 'mz/child_process';
+import Command from './command';
 
 function runGit(git, cwd, commands, opts) {
-  opts = assign({ cwd: cwd }, opts);
-  opts.env = assign({}, process.env, opts.env);
+  opts = Object.assign({ cwd: cwd }, opts);
+  opts.env = Object.assign({}, process.env, opts.env);
   return run(git, commands, opts);
 }
 
-module.exports.Clone = createCommand(function(source, dest) {
-  return run(this.config.git, ['clone', source, dest]);
-});
+export class Clone extends Command {
+  async run(source, dest) {
+    return await run(this.config.git, ['clone', source, dest]);
+  }
+}
 
-module.exports.Revision = createCommand(function(source) {
-  return exec(
-    [this.config.git, 'rev-parse', 'HEAD'].join(' '),
-    { cwd: source, env: process.env }
-  )
-  .then(function(results) {
-    return results[0].trim();
-  });
-})
+export class Revision extends Command {
+  async run(source) {
+    let [stdout] = await exec(
+      [this.config.git, 'rev-parse', 'HEAD'].join(' '),
+      { cwd: source, env: process.env }
+    );
+    return stdout.trim();
+  }
+}
 
-module.exports.CheckoutRevision = createCommand(function(
-  path,
-  repository,
-  ref,
-  revision
-) {
-  return runGit(this.config.git, path, [
-    'fetch',
-    repository,
-    ref
-  ])
-  .then(function() {
-    return runGit(this.config.git, path, [
-      'reset',
-      '--hard'
-    ]);
-  }.bind(this))
-  .then(function() {
-    return runGit(this.config.git, path, [
-      'checkout',
-      revision
-    ]);
-  }.bind(this))
-});
+export class CheckoutRevision extends Command {
+  async run(path, repository, ref, revision) {
+    await runGit(this.config.git, path, ['fetch', repository, ref]);
+    await runGit(this.config.git, path, ['reset', '--hard']);
+    await runGit(this.config.git, path, ['checkout', revision]);
+  }
+}

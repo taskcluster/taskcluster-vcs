@@ -26,6 +26,8 @@
     "argparse": "^0.1.15",
     "bluebird": "^2.3.11",
     "deap": "^1.0.0",
+    "denodeify": "^1.2.0",
+    "event-to-promise": "^0.3.2",
     "graceful-fs": "^3.0.4",
     "js-yaml": "^3.2.3",
     "json-templater": "^1.0.1",
