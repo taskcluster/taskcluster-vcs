@@ -93,7 +93,12 @@ export default async function main(config, argv) {
     prog: 'tc-vcs clone',
     version: require('../../package').version,
     addHelp: true,
-    description: 'issue clone to correct vcs type'
+    description: `
+      Clones the given repository automatically detecting the vcs type based on
+      the remote url. This command will always favor the cache over directly
+      hitting the remote url meaning the clone may be older then the current
+      state of the repository (use checkout-revision to update it).
+    `.trim()
   });
 
   parser.addArgument(['url'], {
