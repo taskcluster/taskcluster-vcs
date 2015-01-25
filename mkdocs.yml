@@ -1,2 +1,4 @@
-site_name: Taskcluster VCS Tools 
+site_name: Taskcluster VCS Tools
 theme: bootstrap
+pages:
+  - ['caching.md', 'Caching strategies']
