@@ -31,3 +31,23 @@ export class CheckoutRevision extends Command {
     await runGit(this.config.git, path, ['checkout', revision]);
   }
 }
+
+export class GetRemoteUrl extends Command {
+  async run(path) {
+    let [stdout] = await exec(
+      [this.config.git, 'config', '--get', 'remote.origin.url'].join(' '),
+      { cwd: path, env: process.env }
+    );
+    return stdout.trim();
+  }
+}
+
+export class GetBranchName extends Command {
+  async run(path) {
+    let [stdout] = await exec(
+      [this.config.git, 'rev-parse', '--abbrev-ref', 'HEAD'].join(' '),
+      { cwd: path, env: process.env }
+    );
+    return stdout.trim();
+  }
+}

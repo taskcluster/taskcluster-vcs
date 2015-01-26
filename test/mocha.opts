@@ -1,1 +1,1 @@
---ui tdd --timeout 20s --require test/entrypoint test/helper
+--ui tdd --timeout 40s --require test/entrypoint test/helper

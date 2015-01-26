@@ -6,9 +6,8 @@ import request from 'superagent-promise';
 import _mkdirp from 'mkdirp';
 import fs from 'mz/fs';
 import fsPath from 'path';
-import urlJoin from 'url-join';
 import denodeify from 'denodeify';
-import URL from 'url';
+import urlAlias from '../vcs/url_alias';
 
 let mkdirp = denodeify(_mkdirp);
 
@@ -17,10 +16,9 @@ Determines if the clone has a cache if it does return a url do it.
 */
 async function getCloneCache(config, url) {
   // normalize the url to the "name"
-  let components = URL.parse(url);
   let cacheName = render(
     config.cloneCache.cacheName,
-    { name: urlJoin(components.host, components.pathname) }
+    { name: urlAlias(url) }
   )
 
   let cacheUrl = render(config.cloneCache.baseUrl, {
@@ -111,7 +109,6 @@ export default async function main(config, argv) {
 
   let args = parser.parseArgs(argv);
   let cache = await getCloneCache(config, args.url);
-
   if (cache) {
     return await useCache(config, cache, args.dest);
   }

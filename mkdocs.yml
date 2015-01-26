@@ -1,4 +1,5 @@
 site_name: Taskcluster VCS Tools
-theme: bootstrap
+theme: readthedocs
 pages:
+  - ['index.md', 'Home']
   - ['caching.md', 'Caching strategies']

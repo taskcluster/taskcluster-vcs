@@ -30,3 +30,24 @@ export class CheckoutRevision extends Command {
     await runHg(this.config.hg, path, ['update', '-C', revision]);
   }
 }
+
+export class GetRemoteUrl extends Command {
+  async run(path) {
+    console.log(path);
+    let [stdout] = await exec(
+      [this.config.hg, 'paths', 'default'].join(' '),
+      { cwd: path, env: process.env }
+    );
+    return stdout.trim();
+  }
+}
+
+export class GetBranchName extends Command {
+  async run(path) {
+    let [stdout] = await exec(
+      [this.config.hg, 'branch'].join(' '),
+      { cwd: path, env: process.env }
+    );
+    return stdout.trim();
+  }
+}
