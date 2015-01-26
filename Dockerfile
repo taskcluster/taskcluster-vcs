@@ -1,4 +1,5 @@
 FROM node:latest
 ADD . /app
-RUN cd /app && npm install && npm link
+WORKDIR /app
+RUN npm install -g taskcluster-vcs
 ENTRYPOINT ["/app/task.sh"]
