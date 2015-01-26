@@ -23,7 +23,7 @@ export default async function run(command, opts = {}) {
 
   var start = Date.now();
   if (opts.verbose) console.log('[tc-vcs] run start : %s', command);
-  var proc = spawn('/bin/bash', ['-ce'].concat(command), opts);
+  var proc = spawn('/bin/bash', ['-c'].concat(command), opts);
   let stdout = '';
   let stderr = '';
 

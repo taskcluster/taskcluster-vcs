@@ -7,28 +7,43 @@ import _mkdirp from 'mkdirp';
 import fs from 'mz/fs';
 import fsPath from 'path';
 import denodeify from 'denodeify';
+import createHash from '../hash';
 import urlAlias from '../vcs/url_alias';
 
 let mkdirp = denodeify(_mkdirp);
 
+import { Index, Queue } from 'taskcluster-client';
+
+// Used in read only fashion so no need to wait to construct...
+let queue = new Queue();
+let index = new Index();
+
 /**
 Determines if the clone has a cache if it does return a url do it.
 */
-async function getCloneCache(config, url) {
+async function getCloneCache(config, namespace, url) {
   // normalize the url to the "name"
+  let alias = urlAlias(url);
   let cacheName = render(
     config.cloneCache.cacheName,
-    { name: urlAlias(url) }
-  )
+    { name: alias }
+  );
 
-  let cacheUrl = render(config.cloneCache.baseUrl, {
-    cacheName: cacheName
-  });
+  let namespace = `${namespace}.${createHash(alias)}`;
+  let task;
 
-  let res = await request.head(cacheUrl).end();
-  if (!res.ok) {
+  try {
+    task = await index.findTask(namespace);
+  } catch (e) {
+    // 404 will throw so validate before returning null...
+    if (e.code && e.code != 404) throw e;
     return null;
   }
+
+  let cacheUrl = queue.buildUrl(queue.getLatestArtifact,
+    task.taskId,
+    `public/${alias}.tar.gz`
+  );
 
   let cacheDir = render(config.cloneCache.cacheDir, {
     env: process.env
@@ -37,7 +52,8 @@ async function getCloneCache(config, url) {
   return {
     url: cacheUrl,
     dest: fsPath.join(cacheDir, cacheName)
-  };
+  }
+
 }
 
 async function useClone(config, source, dest) {
@@ -99,6 +115,14 @@ export default async function main(config, argv) {
     `.trim()
   });
 
+  parser.addArgument(['--namespace'], {
+    defaultValue: 'tc-vcs.v1.clones',
+    help: `
+      Namespace under Index to query should match the value set in
+      create-clone-cache.
+    `.trim()
+  });
+
   parser.addArgument(['url'], {
     help: 'url which to clone from',
   });
@@ -108,7 +132,7 @@ export default async function main(config, argv) {
   });
 
   let args = parser.parseArgs(argv);
-  let cache = await getCloneCache(config, args.url);
+  let cache = await getCloneCache(config, args.namespace, args.url);
   if (cache) {
     return await useCache(config, cache, args.dest);
   }

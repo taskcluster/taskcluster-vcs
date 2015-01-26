@@ -30,6 +30,7 @@ export class GetRemoteUrl extends Command {
   async run(cwd) {
     let [stdout] = await run(`${this.config.hg} paths default`, { 
       cwd,
+      buffer: true,
       verbose: false
     });
     return stdout.trim();
@@ -38,8 +39,9 @@ export class GetRemoteUrl extends Command {
 
 export class GetBranchName extends Command {
   async run(cwd) {
-    let [stdout] = await run(`${this.config.hg} branch`, {
+    let [stdout, stderr] = await run(`${this.config.hg} branch`, {
       cwd,
+      buffer: true,
       verbose: false
     });
     return stdout.trim();

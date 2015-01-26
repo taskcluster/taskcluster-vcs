@@ -32,8 +32,8 @@ export class CheckoutRevision extends Command {
 export class GetRemoteUrl extends Command {
   async run(cwd) {
     let [stdout] = await run(
-      `${this.config.git} config --get remote.origin.url`, 
-      { cwd, verbose: false }
+      `${this.config.git} config --get remote.origin.url`,
+      { cwd, verbose: false, buffer: true }
     );
     return stdout.trim();
   }
@@ -43,7 +43,8 @@ export class GetBranchName extends Command {
   async run(cwd) {
     let [stdout] = await run(`${this.config.git} rev-parse --abbrev-ref HEAD`, {
       cwd,
-      verbose: false
+      verbose: false,
+      buffer: true
     });
     return stdout.trim();
   }

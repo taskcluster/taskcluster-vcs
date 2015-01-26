@@ -3,6 +3,7 @@ import run from './run';
 import fs from 'mz/fs';
 import assert from 'assert';
 import mkdirp from 'mkdirp';
+import cloneCache from './clone_cache';
 
 suite('checkout-revision', function() {
   async function clean() {
@@ -14,20 +15,16 @@ suite('checkout-revision', function() {
   setup(clean);
 
   test('(git) cached -> then update', async function () {
+    let url = 'https://github.com/lightsofapollo/tc-vcs-cache'
+    let [namespace] = await cloneCache(url);
     let dest = __dirname + '/clones/git-checkout-revision/';
     await run([
       'clone',
-      'https://github.com/lightsofapollo/tc-vcs-cache',
+      '--namespace', namespace,
+      url,
       dest
     ]);
     assert((await fs.exists(dest)), 'path exists');
-
-    // The important thing here is this is _not_ the latest commit but the
-    // commit I manually stashed in s3.
-    assert.equal(
-      (await run(['revision', dest]))[0],
-      'a2685cb85c46d57c3698e882871db52a8288e0bb'
-    );
 
     let cachePath = __dirname + '/../cache/' +
                     'clones/github.com/lightsofapollo/tc-vcs-cache.tar.gz';
@@ -49,21 +46,17 @@ suite('checkout-revision', function() {
     );
   });
 
- test('(hg) cached -> then update', async function () {
+  test('(hg) cached -> then update', async function () {
+    let url = 'https://bitbucket.org/lightsofapollo/hgcache';
+    let [namespace] = await cloneCache(url);
     let dest = __dirname + '/clones/hg-checkout-revision/';
     await run([
       'clone',
-      'https://bitbucket.org/lightsofapollo/hgcache',
+      '--namespace', namespace,
+      url,
       dest
     ]);
     assert((await fs.exists(dest)), 'path exists');
-
-    // The important thing here is this is _not_ the latest commit but the
-    // commit I manually stashed in s3.
-    assert.equal(
-      (await run(['revision', dest]))[0],
-      'e2cf6ae0b436ea6a6cbb4adecde36d4b25f90119'
-    );
 
     let cachePath = __dirname + '/../cache/' +
                     'clones/bitbucket.org/lightsofapollo/hgcache.tar.gz';

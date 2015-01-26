@@ -3,6 +3,7 @@ import run from './run';
 import fs from 'mz/fs';
 import assert from 'assert';
 import mkdirp from 'mkdirp';
+import cloneCache from './clone_cache';
 
 suite('clone', function() {
   async function clean() {
@@ -38,18 +39,18 @@ suite('clone', function() {
   });
 
   test('cached', async function () {
+    let url = 'https://github.com/lightsofapollo/tc-vcs-cache';
+    let [namespace] = await cloneCache(url);
     async function testCache (dest) {
       await run([
         'clone',
-        'https://github.com/lightsofapollo/tc-vcs-cache',
+        '--namespace', namespace,
+        url,
         dest
       ]);
 
       assert((await fs.exists(dest)), 'path exists');
       let rev = await run(['revision', dest]);
-      // The important thing here is this is _not_ the latest commit but the
-      // commit I manually stashed in s3.
-      assert.equal(rev[0], 'a2685cb85c46d57c3698e882871db52a8288e0bb');
       let cachePath = __dirname + '/../cache/' +
                       'clones/github.com/lightsofapollo/tc-vcs-cache.tar.gz';
 

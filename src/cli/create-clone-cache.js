@@ -5,6 +5,7 @@ import detect from '../vcs/detect_local';
 import temp from 'promised-temp';
 import render from 'json-templater/string';
 import fs from 'mz/fs';
+import fsPath from 'path';
 import ms from 'ms';
 import urlAlias from '../vcs/url_alias';
 import createHash from '../hash';
@@ -13,7 +14,12 @@ import run from '../vcs/run';
 import { Index, Queue } from 'taskcluster-client';
 
 async function createTar(config, source, dest) {
-  await run(render(config.cloneCache.compress, { source, dest }));
+  let cwd = fsPath.dirname(source);
+  let dir = fsPath.basename(source);
+
+  await run(render(config.cloneCache.compress, { source: dir, dest }), {
+    cwd,
+  });
 }
 
 async function uploadTar(config, source, url) {
@@ -132,7 +138,7 @@ export default async function main(config, argv) {
   await uploadTar(config, tarPath, artifact.putUrl);
 
   let hash = createHash(alias);
-  let namespace = `${args.namespace}.${vcsConfig.type}.${hash}`;
+  let namespace = `${args.namespace}.${hash}`;
 
   await index.insertTask(namespace, {
     taskId: args.taskId,

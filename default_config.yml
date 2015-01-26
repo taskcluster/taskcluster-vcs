@@ -7,10 +7,10 @@ cloneCache:
   # The root where all downloaded cache files are stored on the local machine...
   cacheDir: '{{env.HOME}}/.tc-vcs/'
   # Command used to upload the tarball
-  uploadTar: "curl --header 'Content-Type: application/x-tar' --header 'Content-Encoding: gzip' -X PUT --retry 5 --data-binary @'{{source}}' {{url}}"
+  uploadTar: "curl --header 'Content-Type: application/x-tar' --header 'Content-Encoding: gzip' -X PUT --retry-delay 2 --retry 5 --data-binary @'{{source}}' '{{url}}'"
   # Large http get requests are often slower using nodes built in http layer so
   # we utilize a subprocess which is responsible for fetching...
-  get: curl --retry 5 -o {{dest}} {{url}}
+  get: curl -L --retry 5 -o {{dest}} {{url}}
   # Used to create clone tarball
   compress: tar -czf {{dest}} {{source}}
   # All cache urls use tar + gz this is the command used to extract those files
@@ -18,6 +18,4 @@ cloneCache:
   extract: tar -x -z --strip-components 1 -C {{dest}} -f {{source}}
   # Name/prefixed used as part of the base url.
   cacheName: clones/{{name}}.tar.gz
-  # The baseUrl is used when cloning if there is a appropriate object.
-  baseUrl: https://s3-us-west-2.amazonaws.com/taskcluster-sources/{{cacheName}}
 
