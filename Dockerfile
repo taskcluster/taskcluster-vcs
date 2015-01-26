@@ -1,3 +1,4 @@
 FROM node:latest
 RUN npm install -g taskcluster-vcs --no-optional
-ENTRYPOINT ["/app/task.sh"]
+COPY task.sh /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]
