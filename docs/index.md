@@ -1,10 +1,16 @@
 # Taskcluster VCS Tools
 
-## Strategy
+Using VCS optimally in a CI environment is difficult `tc-vcs` aims to do
+this job for you via a set of [taskcluster](http://docs.taskcluster.net/)
+integrated commands.
 
-The goal is to provide a moderately normalized clone/reset/checkout strategy for
-both hg and git. Additionally where possible use caches (on s3) instead
-of direct clones.
+Currently the following features are available:
+
+ - Equal first class support for both hg and git.
+ - Creating remote caches of clones [caches](./caching.md).
+ - Utilization of remote and local caches for clone operations.
+ - "Checkout revision" commands (useful for mozilla "try" like
+   workflows)
 
 ## Usage:
 
@@ -18,6 +24,11 @@ tc-vcs --help
 
 ## Developing:
 
+This project is developed in node.js and uses [6to5](https://github.com/6to5/6to5)
+to provide a complete ES6 based environment. In addition the
+experimental `async` operator is used heavily in conjunction with
+promises.
+
 ### Directory Structure:
 
   - bin/tc-vcs : Primary entrypoint.
@@ -27,15 +38,16 @@ tc-vcs --help
 
 ## Tests
 
-The tests require node 0.11x or greater and make heavy use of
-generators/co this is only required for tests.
+Tests are written in mocha and require taskcluster credentials see the
+[taskcluster client](https://github.com/taskcluster/taskcluster-client)
+for details on how to configure the environment variables needed.
 
 ```sh
 # Run all the tests
 npm install
 
 # Run one test
-./test/test.sh <test>
+./node_modules/.bin/mocha <test>
 ```
 
 ## LICENSE
