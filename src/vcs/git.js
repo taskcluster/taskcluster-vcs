@@ -1,53 +1,50 @@
 import run from './run';
-import { exec } from 'mz/child_process';
 import Command from './command';
-
-function runGit(git, cwd, commands, opts) {
-  opts = Object.assign({ cwd: cwd }, opts);
-  opts.env = Object.assign({}, process.env, opts.env);
-  return run(git, commands, opts);
-}
 
 export class Clone extends Command {
   async run(source, dest) {
-    return await run(this.config.git, ['clone', source, dest]);
+    return await run(`${this.config.git} clone ${source} ${dest}`);
   }
 }
 
 export class Revision extends Command {
-  async run(source) {
-    let [stdout] = await exec(
-      [this.config.git, 'rev-parse', 'HEAD'].join(' '),
-      { cwd: source, env: process.env }
+  async run(cwd) {
+    let [stdout] = await run(
+      `${this.config.git} rev-parse HEAD`,
+      {
+        cwd,
+        verbose: false,
+        buffer: true
+      }
     );
     return stdout.trim();
   }
 }
 
 export class CheckoutRevision extends Command {
-  async run(path, repository, ref, revision) {
-    await runGit(this.config.git, path, ['fetch', repository, ref]);
-    await runGit(this.config.git, path, ['reset', '--hard']);
-    await runGit(this.config.git, path, ['checkout', revision]);
+  async run(cwd, repository, ref, revision) {
+    await run(`${this.config.git} fetch ${repository} ${ref}`, { cwd });
+    await run(`${this.config.git} reset --hard`, { cwd });
+    await run(`${this.config.git} checkout ${revision}`, { cwd });
   }
 }
 
 export class GetRemoteUrl extends Command {
-  async run(path) {
-    let [stdout] = await exec(
-      [this.config.git, 'config', '--get', 'remote.origin.url'].join(' '),
-      { cwd: path, env: process.env }
+  async run(cwd) {
+    let [stdout] = await run(
+      `${this.config.git} config --get remote.origin.url`, 
+      { cwd, verbose: false }
     );
     return stdout.trim();
   }
 }
 
 export class GetBranchName extends Command {
-  async run(path) {
-    let [stdout] = await exec(
-      [this.config.git, 'rev-parse', '--abbrev-ref', 'HEAD'].join(' '),
-      { cwd: path, env: process.env }
-    );
+  async run(cwd) {
+    let [stdout] = await run(`${this.config.git} rev-parse --abbrev-ref HEAD`, {
+      cwd,
+      verbose: false
+    });
     return stdout.trim();
   }
 }

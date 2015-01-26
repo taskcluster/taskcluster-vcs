@@ -72,7 +72,7 @@ async function downloadAndExtractCache(config, cache, dest) {
     dest: cache.dest
   });
 
-  await run('/bin/bash', ['-c', cmd]);
+  await run(cmd);
   return await cacheExtract(config, cache.dest, dest);
 }
 
@@ -83,7 +83,7 @@ async function cacheExtract(config, source, dest) {
   });
 
   await mkdirp(dest);
-  return await run('/bin/bash', ['-c', cmd]);
+  return await run(cmd);
 }
 
 export default async function main(config, argv) {

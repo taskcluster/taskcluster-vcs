@@ -7,7 +7,7 @@ cloneCache:
   # The root where all downloaded cache files are stored on the local machine...
   cacheDir: '{{env.HOME}}/.tc-vcs/'
   # Command used to upload the tarball
-  uploadTar: "curl --header 'Content-Type: application/x-tar' --header 'Content-Encoding: gzip' -X PUT --retry 5 --data-binary @{{source}} {{url}}"
+  uploadTar: "curl --header 'Content-Type: application/x-tar' --header 'Content-Encoding: gzip' -X PUT --retry 5 --data-binary @'{{source}}' {{url}}"
   # Large http get requests are often slower using nodes built in http layer so
   # we utilize a subprocess which is responsible for fetching...
   get: curl --retry 5 -o {{dest}} {{url}}

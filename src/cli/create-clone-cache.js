@@ -3,27 +3,23 @@ import clone from './clone';
 import checkoutRevision from './checkout-revision';
 import detect from '../vcs/detect_local';
 import temp from 'promised-temp';
-import run from '../vcs/run';
-import { exec } from 'mz/child_process';
 import render from 'json-templater/string';
 import fs from 'mz/fs';
 import ms from 'ms';
 import urlAlias from '../vcs/url_alias';
 import createHash from '../hash';
+import run from '../vcs/run';
 
 import { Index, Queue } from 'taskcluster-client';
 
 async function createTar(config, source, dest) {
-  let cmd = render(config.cloneCache.compress, { source, dest });
-  await exec(cmd);
+  await run(render(config.cloneCache.compress, { source, dest }));
 }
 
 async function uploadTar(config, source, url) {
-  let cmd = render(config.cloneCache.uploadTar, {
+  await run(render(config.cloneCache.uploadTar, {
     source, url
-  });
-  console.log(cmd);
-  await exec(cmd);
+  }));
 }
 
 export default async function main(config, argv) {
@@ -150,5 +146,5 @@ export default async function main(config, argv) {
   });
 
   // cleanup after ourselves...
-  await exec(`rm -rf ${dir} ${tarPath}`)
+  await run(`rm -rf ${dir} ${tarPath}`)
 }

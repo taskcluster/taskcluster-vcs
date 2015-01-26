@@ -1,53 +1,47 @@
 import run from './run';
-import { exec } from 'mz/child_process';
 import Command from './command';
-
-function runHg(hg, cwd, commands, opts) {
-  opts = Object.assign({ cwd: cwd }, opts);
-  opts.env = Object.assign({}, process.env, opts.env);
-  return run(hg, commands, opts);
-}
 
 export class Clone extends Command {
   async run(source, dest) {
-    return await run(this.config.hg, ['clone', source, dest]);
+    return await run(`${this.config.hg} clone ${source} ${dest}`);
   }
 }
 
 export class Revision extends Command {
-  async run(source) {
-    let [stdout] = await exec(
-      [this.config.hg, 'parent', '--template', '{node}'].join(' '),
-      { cwd: source, env: process.env }
-    );
+  async run(cwd) {
+    let [stdout] = await run(`${this.config.hg} parent --template {node}`, {
+      buffer: true,
+      cwd,
+      verbose: false
+    });
+
     return stdout.trim();
   }
 }
 
 export class CheckoutRevision extends Command {
-  async run(path, repository, ref, revision) {
-    await runHg(this.config.hg, path, ['pull', '-r', revision, repository]);
-    await runHg(this.config.hg, path, ['update', '-C', revision]);
+  async run(cwd, repository, ref, revision) {
+    await run(`${this.config.hg} pull -r ${revision} ${repository}`, { cwd });
+    await run(`${this.config.hg} update -C ${revision}`, { cwd });
   }
 }
 
 export class GetRemoteUrl extends Command {
-  async run(path) {
-    console.log(path);
-    let [stdout] = await exec(
-      [this.config.hg, 'paths', 'default'].join(' '),
-      { cwd: path, env: process.env }
-    );
+  async run(cwd) {
+    let [stdout] = await run(`${this.config.hg} paths default`, { 
+      cwd,
+      verbose: false
+    });
     return stdout.trim();
   }
 }
 
 export class GetBranchName extends Command {
-  async run(path) {
-    let [stdout] = await exec(
-      [this.config.hg, 'branch'].join(' '),
-      { cwd: path, env: process.env }
-    );
+  async run(cwd) {
+    let [stdout] = await run(`${this.config.hg} branch`, {
+      cwd,
+      verbose: false
+    });
     return stdout.trim();
   }
 }
