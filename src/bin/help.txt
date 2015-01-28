@@ -17,12 +17,16 @@ Commands:
 
   create-clone-cache: Clone / update and upload a cache of a repository.
 
-  clone : Determines the VCS in use and attempts to use caches prior to
-          fetching.
-
-  checkout-revision : Checkout particular revision in repository.
+  checkout: In an idempotent fashion checkout a particular revision of a
+            repository cloning if needed then updating to given revision.
 
   revision : Output the current revision of a repository.
+
+  clone : Determines the VCS in use and attempts to use caches prior to
+          fetching. DEPRECATED: use checkout instead.
+
+  checkout-revision : Checkout particular revision in repository.
+                      DEPRECATED: use checkout instead.
 
 Configuration (yaml file):
 

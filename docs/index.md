@@ -22,6 +22,14 @@ npm install taskcluster-vcs -g
 tc-vcs --help
 ```
 
+The most common and useful command is `checkout`
+
+```sh
+# Checkout revision of try (in usual mozilla "try" workflow fashion)
+tc-vcs checkout https://hg.mozilla.org/mozilla-central https://hg.mozilla.org/try $REV $REV try_dir
+
+```
+
 ## Developing:
 
 This project is developed in node.js and uses [6to5](https://github.com/6to5/6to5)
