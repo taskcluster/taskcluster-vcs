@@ -89,7 +89,7 @@ export default async function main(config, argv) {
   let dir = temp.path('tc-vcs-create-clone-cache');
 
   // Clone and update cache...
-  await checkout(config, [dir, args.url]);
+  await checkout(config, [dir, args.url, '--namespace', args.namespace]);
 
   let queueOpts = {};
   let indexOpts = {};
