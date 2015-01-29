@@ -1,7 +1,5 @@
 import { ArgumentParser } from 'argparse';
-import clone from './clone';
-import checkoutRevision from './checkout-revision';
-import detect from '../vcs/detect_local';
+import checkout from './checkout';
 import temp from 'promised-temp';
 import render from 'json-templater/string';
 import fs from 'mz/fs';
@@ -90,21 +88,8 @@ export default async function main(config, argv) {
   let args = parser.parseArgs(argv);
   let dir = temp.path('tc-vcs-create-clone-cache');
 
-  // initiate the clone (which may simply hit the cache)
-  await clone(config, [args.url, dir]);
-
-  // figure out which vcs we are so we can then figure out what branch to update
-  // to.
-  let vcsConfig = await detect(dir);
-  let module = require(`../vcs/${vcsConfig.type}`);
-
-  let [remote, branch] = await Promise.all([
-    (new module.GetRemoteUrl(config)).run(dir),
-    (new module.GetBranchName(config)).run(dir)
-  ]);
-
-  // now that we we know the branch/repository we can update the clone...
-  await checkoutRevision(config, [dir, remote, branch, branch]);
+  // Clone and update cache...
+  await checkout(config, [dir, args.url]);
 
   let queueOpts = {};
   let indexOpts = {};
