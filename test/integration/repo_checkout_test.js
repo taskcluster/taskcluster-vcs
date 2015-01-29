@@ -13,17 +13,16 @@ suite('repo-checkout', function() {
     mkdirp.sync(__dirname + '/clones');
   }
 
-  //teardown(clean);
+  teardown(clean);
   setup(clean);
 
   test('successful repo sync', async function () {
-    let [out] = await run(['checkout', url, url, 'master', 'master', dest]);
     await run([
-      'repo-checkout', '-c', `./config.sh do sources.xml`, dest
+      'repo-checkout', '-c', `./config.sh do sources.xml`, dest, url
     ]);
 
     let [rev] = await run(['revision', `${dest}/gittesting`]);
     assert.equal(rev, '3d8bd58cddfa558b78e947ed04ad8f9a3359ed73');
     console.log(rev);
   });
-});
+})
