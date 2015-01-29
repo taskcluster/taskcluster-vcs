@@ -1,9 +1,69 @@
 import { ArgumentParser, RawDescriptionHelpFormatter } from 'argparse';
 import checkout from './checkout';
 import run from '../vcs/run';
-import request from 'superagent-promise';
+import render from 'json-templater/string';
 import fs from 'mz/fs';
 import fsPath from 'path';
+import temp from 'promised-temp';
+import urlAlias from '../vcs/url_alias';
+import createHash from '../hash';
+
+import { Index, Queue } from 'taskcluster-client';
+
+// Used in read only fashion so no need to wait to construct...
+let queue = new Queue();
+let index = new Index();
+
+/**
+Determines if the clone has a cache if it does return a url do it.
+*/
+async function getRepoCache(config, namespace, url, command) {
+  // normalize the url to the "name"
+  let alias = urlAlias(url);
+  let namespace = [
+    namespace,
+    createHash(alias),
+    createHash(command)
+  ].join('.');
+
+  let task;
+  try {
+    task = await index.findTask(namespace);
+  } catch (e) {
+    // 404 will throw so validate before returning null...
+    if (e.code && e.code != 404) throw e;
+    return null;
+  }
+
+  // Note that unlike some other caches we do not cache repo data locally (at
+  // least not yet...).
+  return queue.buildUrl(queue.getLatestArtifact,
+    task.taskId,
+    `public/${alias}-${createHash(command)}.tar.gz`
+  );
+}
+
+async function useCache(config, url, dest) {
+  let tempPath = temp.path();
+  try {
+    await run(render(config.repoCache.get, {
+      url: url,
+      dest: tempPath
+    }));
+
+    await run(render(config.repoCache.extract, {
+      source: tempPath,
+      dest
+    }));
+  } catch (e) {
+    throw e;
+  } finally {
+    // Ensure we clean up the temp file it may be massive!
+    if (await fs.exists(tempPath)) {
+      await fs.unlink(tempPath);
+    }
+  }
+}
 
 export default async function main(config, argv) {
   let parser = new ArgumentParser({
@@ -92,6 +152,19 @@ export default async function main(config, argv) {
 
   // Checkout the underlying repository before running repo...
   await checkout(config, checkoutArgs);
+
+  // If this is a brand new repository attempt to prefill .repo...
+  if (!await fs.exists(fsPath.join(args.directory, '.repo'))) {
+    let cacheUrl = await getRepoCache(
+      config, args.namespace, args.baseUrl, args.command
+    );
+
+    if (cacheUrl) {
+      await useCache(config, cacheUrl, args.directory);
+    }
+  }
+
+  // Running the command again should bring us to an updated state...
   await run(args.command, { cwd: args.directory });
 
   if (!await fs.exists(fsPath.join(args.directory, '.repo'))) {

@@ -3,6 +3,18 @@
 git: git
 hg: hg
 
+repoCache:
+  # Command used to upload the tarball
+  uploadTar: "curl --header 'Content-Type: application/x-tar' --header 'Content-Encoding: gzip' -X PUT --retry-delay 2 --retry 5 --data-binary @'{{source}}' '{{url}}'"
+  # Large http get requests are often slower using nodes built in http layer so
+  # we utilize a subprocess which is responsible for fetching...
+  get: curl -L --retry 5 -o {{dest}} {{url}}
+  # Used to create clone tarball
+  compress: tar -czf {{dest}} {{source}}
+  # All cache urls use tar + gz this is the command used to extract those files
+  # downloaded by the "get" command.
+  extract: tar -x -z -C {{dest}} -f {{source}}
+
 cloneCache:
   # The root where all downloaded cache files are stored on the local machine...
   cacheDir: '{{env.HOME}}/.tc-vcs/'

@@ -2,7 +2,6 @@ import { ArgumentParser } from 'argparse';
 import detect from '../vcs/detect_remote';
 import run from '../vcs/run';
 import render from 'json-templater/string';
-import request from 'superagent-promise';
 import _mkdirp from 'mkdirp';
 import fs from 'mz/fs';
 import fsPath from 'path';

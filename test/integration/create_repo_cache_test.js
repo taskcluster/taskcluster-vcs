@@ -1,6 +1,7 @@
 import rm from './rm';
 import run from './run';
 import fs from 'mz/fs';
+import fsPath from 'path';
 import assert from 'assert';
 import mkdirp from 'mkdirp';
 import hash from '../../src/hash';
