@@ -24,7 +24,7 @@ export default async function run(command, opts = {}) {
 
   let cwd = opts.cwd || process.cwd();
   var start = Date.now();
-  if (opts.verbose) console.log(`[tc-vcs] run start : (cwd: ${cwd} ${command}`);
+  if (opts.verbose) console.log(`[tc-vcs] run start : (cwd: ${cwd}) ${command}`);
   var proc = spawn('/bin/bash', ['-c'].concat(command), opts);
   let stdout = '';
   let stderr = '';
