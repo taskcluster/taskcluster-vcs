@@ -44,12 +44,30 @@ export default async function main(config, argv) {
     `.trim()
   });
 
+  parser.addArgument(['directory'], {
+    type: (value) => {
+      return fsPath.resolve(value);
+    },
+    help: 'Target directory which to clone and update'
+  });
+
   parser.addArgument(['baseUrl'], {
     help: 'Base repository to clone',
   });
 
   parser.addArgument(['headUrl'], {
-    help: 'Head url to fetch changes from'
+    help: `
+      Head url to fetch changes from. If this value is not given baseUrl is used.
+    `,
+    nargs: '?'
+  });
+
+  parser.addArgument(['headRev'], {
+    help: `
+      Revision/changeset to pull from the repository. If not given this defaults
+      to the "tip"/"master" of the default branch.
+    `,
+    nargs: '?'
   });
 
   parser.addArgument(['headRef'], {
@@ -59,18 +77,10 @@ export default async function main(config, argv) {
       revision from a git branch but must fetch the reference and then proceede
       to checkout the particular revision you want (git generally does not support
       pulling specific revisions only references).
-    `.trim()
-  });
 
-  parser.addArgument(['headRev'], {
-    help: 'Revision/changeset to pull from the repository'
-  });
-
-  parser.addArgument(['directory'], {
-    type: (value) => {
-      return fsPath.resolve(value);
-    },
-    help: 'Target directory which to clone and update'
+      If not given defaults to headRev.
+    `.trim(),
+    nargs: '?'
   });
 
   let args = parser.parseArgs(argv);
@@ -91,6 +101,19 @@ export default async function main(config, argv) {
     }
   } else {
     await clone(config, [args.baseUrl, args.directory]);
+  }
+
+  let vcsConfig = await detect(args.directory);
+  let module = require(`../vcs/${vcsConfig.type}`);
+
+  // Purely for convenience we have a set of defaults which make this command
+  // much easier to manage.
+  if (!args.headUrl) args.headUrl = args.baseUrl;
+  if (!args.headRev) {
+    args.headRev = await (new module.GetBranchName(config)).run(args.directory);
+  }
+  if (!args.headRef) {
+    args.headRef = args.headRev;
   }
 
   await checkoutRevision(

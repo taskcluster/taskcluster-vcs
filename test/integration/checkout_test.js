@@ -21,11 +21,11 @@ suite('checkout', function() {
     try {
       await run([
         'checkout',
+        dest,
         'https://github.com/lightsofapollo/tc-vcs-cache',
         'https://github.com/lightsofapollo/tc-vcs-cache',
         'master',
         '3b241b02a9860354d416504a476d597783101ac5',
-        dest
       ]);
     } catch (e) {
       assert.ok(e.message.indexOf('not a known vcs type') !== -1)
@@ -42,11 +42,11 @@ suite('checkout', function() {
     async function checkout() {
       await run([
         'checkout',
+        dest,
         url,
         url,
         'master',
-        '3b241b02a9860354d416504a476d597783101ac5',
-        dest
+        '3b241b02a9860354d416504a476d597783101ac5'
       ]);
 
       assert.equal(
@@ -68,11 +68,11 @@ suite('checkout', function() {
       await run([
         'checkout',
         '--namespace', namespace,
+        dest,
         url,
         url,
         'master',
-        '3b241b02a9860354d416504a476d597783101ac5',
-        dest
+        '3b241b02a9860354d416504a476d597783101ac5'
       ]);
 
       assert.equal(
@@ -83,6 +83,22 @@ suite('checkout', function() {
 
     await checkout();
     await checkout();
+  });
+
+
+  test('(with defaults) checkout fresh', async function () {
+    let url = 'https://github.com/lightsofapollo/tc-vcs-cache'
+    let dest = `${__dirname}/clones/tc-vcs-cache`;
+    await run([
+      'checkout',
+      dest,
+      url
+    ]);
+
+    assert.equal(
+      (await run(['revision', dest]))[0],
+      '3b241b02a9860354d416504a476d597783101ac5'
+    );
   });
 });
 
