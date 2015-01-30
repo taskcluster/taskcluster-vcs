@@ -12,19 +12,19 @@ suite('repo-checkout', function() {
 
   let url = 'https://github.com/taskcluster/tc-vcs-repo-test';
   let dest = __dirname + '/clones/repo';
-  let command = './config.sh do sources.xml';
+  let manifest = `${dest}/sources.xml`
 
   async function clean() {
     await rm('./clones/');
     mkdirp.sync(__dirname + '/clones');
   }
 
-  //teardown(clean);
+  teardown(clean);
   setup(clean);
 
-  test('successful repo sync', async function () {
+  test.only('successful repo sync', async function () {
     await run([
-      'repo-checkout', '-c', command, dest, url
+      'repo-checkout', '-m', manifest, dest, url
     ]);
 
     let [rev] = await run(['revision', `${dest}/gittesting`]);
@@ -38,7 +38,7 @@ suite('repo-checkout', function() {
       await run([
         'repo-checkout',
         '--namespace', namespace,
-        '-c', command, dest, url
+        '-m', manifest, dest, url
       ]);
 
       let [rev] = await run(['revision', `${dest}/gittesting`]);
@@ -53,7 +53,7 @@ suite('repo-checkout', function() {
       assert.equal(cache.taskId, taskId);
     }
 
-    //await checkout();
+    await checkout();
     await checkout();
   });
 })

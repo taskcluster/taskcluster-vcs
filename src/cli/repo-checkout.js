@@ -7,6 +7,7 @@ import fsPath from 'path';
 import temp from 'promised-temp';
 import urlAlias from '../vcs/url_alias';
 import createHash from '../hash';
+import vcsRepo from '../vcs/repo';
 
 import { Index, Queue } from 'taskcluster-client';
 
@@ -17,7 +18,7 @@ let index = new Index();
 /**
 Determines if the clone has a cache if it does return a url do it.
 */
-async function getRepoCache(config, namespace, url, command) {
+async function getRepoCache(config, namespace, url) {
   // normalize the url to the "name"
   let alias = urlAlias(url);
   let namespace = [
@@ -92,10 +93,11 @@ export default async function main(config, argv) {
     `.trim()
   });
 
-  parser.addArgument(['-c', '--command'], {
+  parser.addArgument(['-m', '--manifest'], {
     required: true,
+    dest: 'manifest',
     help: `
-      Command to use to initialize repo this is run with a bash shell.
+      Manifest xml file to use to initialize repo.
     `
   });
 
@@ -153,19 +155,10 @@ export default async function main(config, argv) {
   // Checkout the underlying repository before running repo...
   await checkout(config, checkoutArgs);
 
-  // If this is a brand new repository attempt to prefill .repo...
-  if (!await fs.exists(fsPath.join(args.directory, '.repo'))) {
-    let cacheUrl = await getRepoCache(
-      config, args.namespace, args.baseUrl, args.command
-    );
-
-    if (cacheUrl) {
-      await useCache(config, cacheUrl, args.directory);
-    }
-  }
-
-  // Running the command again should bring us to an updated state...
-  await run(args.command, { cwd: args.directory });
+  // Initialize the directory with the repo command...
+  await vcsRepo.init(config, args.directory, args.manifest);
+  // Update any sources created by the repo command...
+  await vcsRepo.sync(config, args.directory);
 
   if (!await fs.exists(fsPath.join(args.directory, '.repo'))) {
     console.error(`${args.command} ran but did not generate a .repo directory`);
