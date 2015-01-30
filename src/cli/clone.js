@@ -1,5 +1,5 @@
 import { ArgumentParser } from 'argparse';
-import detect from '../vcs/detect_remote';
+import detect from '../vcs/detect';
 import run from '../vcs/run';
 import render from 'json-templater/string';
 import _mkdirp from 'mkdirp';

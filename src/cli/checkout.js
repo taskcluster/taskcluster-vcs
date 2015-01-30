@@ -1,5 +1,5 @@
 import { ArgumentParser, RawDescriptionHelpFormatter } from 'argparse';
-import detect from '../vcs/detect_local';
+import detectLocal from '../vcs/detect_local';
 import run from '../vcs/run';
 import _mkdirp from 'mkdirp';
 import fs from 'mz/fs';
@@ -89,7 +89,7 @@ export default async function main(config, argv) {
   // type...
   if (await fs.exists(args.directory)) {
     try {
-      let vcsConfig = await detect(args.directory);
+      let vcsConfig = await detectLocal(args.directory);
     } catch (err) {
       console.error(
         `
