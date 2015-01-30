@@ -4,7 +4,7 @@ import urlJoin from 'url-join';
 
 /**
 -> <url>?cmd=lookup&key=0 (if this is hg content-type will contain "mercurial")
--> 
+->
 */
 
 /**
@@ -67,7 +67,7 @@ function firstSuccess(promises) {
   });
 }
 
-export default async function detect(url) {
+export default async function detectRemote(url) {
   let components = URL.parse(url);
 
   // In the case of ssh endpoint convert to https which in most cases will

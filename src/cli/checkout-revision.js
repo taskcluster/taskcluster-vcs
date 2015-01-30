@@ -1,5 +1,5 @@
 import { ArgumentParser } from 'argparse';
-import detect from '../vcs/detect_local'
+import detectLocal from '../vcs/detect_local'
 
 export default async function main(config, argv) {
   let parser = new ArgumentParser({
@@ -26,7 +26,7 @@ export default async function main(config, argv) {
   });
 
   let args = parser.parseArgs(argv);
-  let vcsConfig = await detect(args.path);
+  let vcsConfig = await detectLocal(args.path);
   let module = require('../vcs/' + vcsConfig.type);
   let revision = new module.CheckoutRevision(config);
   await revision.run(args.path, args.repository, args.ref, args.revision);

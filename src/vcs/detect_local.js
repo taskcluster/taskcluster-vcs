@@ -1,7 +1,7 @@
 import fs from 'mz/fs';
 import assert from 'assert';
 
-export default async function detect(path) {
+export default async function detectLocal(path) {
   assert(typeof path === 'string', 'path must be a string');
   assert(path, 'path is required')
 
