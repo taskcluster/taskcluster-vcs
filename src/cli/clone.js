@@ -57,9 +57,8 @@ async function getCloneCache(config, namespace, url) {
 
 async function useClone(config, source, dest) {
   let vcsConfig = await detect(source);
-  let module = require('../vcs/' + vcsConfig.type);
-  let clone = new module.Clone(config);
-  return await clone.run(source, dest);
+  let vcs = require('../vcs/' + vcsConfig.type);
+  return await vcs.clone(config, source, dest);
 }
 
 async function useCache(config, cache, dest) {

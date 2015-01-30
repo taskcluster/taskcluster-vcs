@@ -9,12 +9,10 @@ export default async function main(config, argv) {
     description: 'get current revision'
   });
 
-
   let args = parser.parseKnownArgs(argv);
   let path = args[1][0] || process.cwd();
   let vcsConfig = await detectLocal(path);
-  let module = require('../vcs/' + vcsConfig.type);
-  let revision = new module.Revision(config);
-  process.stdout.write(await revision.run(path));
+  let vcs = require('../vcs/' + vcsConfig.type);
+  process.stdout.write(await vcs.revision(config, path));
 }
 

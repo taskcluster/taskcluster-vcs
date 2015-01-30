@@ -27,7 +27,8 @@ export default async function main(config, argv) {
 
   let args = parser.parseArgs(argv);
   let vcsConfig = await detectLocal(args.path);
-  let module = require('../vcs/' + vcsConfig.type);
-  let revision = new module.CheckoutRevision(config);
-  await revision.run(args.path, args.repository, args.ref, args.revision);
+  let vcs = require('../vcs/' + vcsConfig.type);
+  await vcs.checkoutRevision(
+    config, args.path, args.repository, args.ref, args.revision
+  );
 }

@@ -1,51 +1,40 @@
 import run from './run';
-import Command from './command';
 
-export class Clone extends Command {
-  async run(source, dest) {
-    return await run(`${this.config.git} clone ${source} ${dest}`);
-  }
+export async function clone(config, source, dest) {
+  return await run(`${config.git} clone ${source} ${dest}`);
 }
 
-export class Revision extends Command {
-  async run(cwd) {
-    let [stdout] = await run(
-      `${this.config.git} rev-parse HEAD`,
-      {
-        cwd,
-        verbose: false,
-        buffer: true
-      }
-    );
-    return stdout.trim();
-  }
-}
-
-export class CheckoutRevision extends Command {
-  async run(cwd, repository, ref, revision) {
-    await run(`${this.config.git} fetch ${repository} ${ref}`, { cwd });
-    await run(`${this.config.git} reset --hard`, { cwd });
-    await run(`${this.config.git} checkout ${revision}`, { cwd });
-  }
-}
-
-export class GetRemoteUrl extends Command {
-  async run(cwd) {
-    let [stdout] = await run(
-      `${this.config.git} config --get remote.origin.url`,
-      { cwd, verbose: false, buffer: true }
-    );
-    return stdout.trim();
-  }
-}
-
-export class GetBranchName extends Command {
-  async run(cwd) {
-    let [stdout] = await run(`${this.config.git} rev-parse --abbrev-ref HEAD`, {
+export async function revision(config, cwd) {
+  let [stdout] = await run(
+    `${config.git} rev-parse HEAD`,
+    {
       cwd,
       verbose: false,
       buffer: true
-    });
-    return stdout.trim();
-  }
+    }
+  );
+  return stdout.trim();
+}
+
+export async function checkoutRevision(config, cwd, repository, ref, rev) {
+  await run(`${config.git} fetch ${repository} ${ref}`, { cwd });
+  await run(`${config.git} reset --hard`, { cwd });
+  await run(`${config.git} checkout ${rev}`, { cwd });
+}
+
+export async function remoteUrl(config, cwd) {
+  let [stdout] = await run(
+    `${config.git} config --get remote.origin.url`,
+    { cwd, verbose: false, buffer: true }
+  );
+  return stdout.trim();
+}
+
+export async function branchName(config, cwd) {
+  let [stdout] = await run(`${config.git} rev-parse --abbrev-ref HEAD`, {
+    cwd,
+    verbose: false,
+    buffer: true
+  });
+  return stdout.trim();
 }

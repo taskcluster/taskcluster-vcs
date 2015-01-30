@@ -104,13 +104,13 @@ export default async function main(config, argv) {
   }
 
   let vcsConfig = await detectLocal(args.directory);
-  let module = require(`../vcs/${vcsConfig.type}`);
+  let vcs = require(`../vcs/${vcsConfig.type}`);
 
   // Purely for convenience we have a set of defaults which make this command
   // much easier to manage.
   if (!args.headUrl) args.headUrl = args.baseUrl;
   if (!args.headRev) {
-    args.headRev = await (new module.GetBranchName(config)).run(args.directory);
+    args.headRev = await vcs.branchName(config, args.directory);
   }
   if (!args.headRef) {
     args.headRef = args.headRev;

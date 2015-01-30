@@ -1,49 +1,38 @@
 import run from './run';
-import Command from './command';
 
-export class Clone extends Command {
-  async run(source, dest) {
-    return await run(`${this.config.hg} clone ${source} ${dest}`);
-  }
+export async function clone(config, source, dest) {
+  return await run(`${config.hg} clone ${source} ${dest}`);
 }
 
-export class Revision extends Command {
-  async run(cwd) {
-    let [stdout] = await run(`${this.config.hg} parent --template {node}`, {
-      buffer: true,
-      cwd,
-      verbose: false
-    });
+export async function revision(config, cwd) {
+  let [stdout] = await run(`${config.hg} parent --template {node}`, {
+    buffer: true,
+    cwd,
+    verbose: false
+  });
 
-    return stdout.trim();
-  }
+  return stdout.trim();
 }
 
-export class CheckoutRevision extends Command {
-  async run(cwd, repository, ref, revision) {
-    await run(`${this.config.hg} pull -r ${revision} ${repository}`, { cwd });
-    await run(`${this.config.hg} update -C ${revision}`, { cwd });
-  }
+export async function checkoutRevision(config, cwd, repository, ref, revision) {
+  await run(`${config.hg} pull -r ${revision} ${repository}`, { cwd });
+  await run(`${config.hg} update -C ${revision}`, { cwd });
 }
 
-export class GetRemoteUrl extends Command {
-  async run(cwd) {
-    let [stdout] = await run(`${this.config.hg} paths default`, { 
-      cwd,
-      buffer: true,
-      verbose: false
-    });
-    return stdout.trim();
-  }
+export async function remoteUrl(config, cwd) {
+  let [stdout] = await run(`${config.hg} paths default`, {
+    cwd,
+    buffer: true,
+    verbose: false
+  });
+  return stdout.trim();
 }
 
-export class GetBranchName extends Command {
-  async run(cwd) {
-    let [stdout, stderr] = await run(`${this.config.hg} branch`, {
-      cwd,
-      buffer: true,
-      verbose: false
-    });
-    return stdout.trim();
-  }
+export async function branchName(config, cwd) {
+  let [stdout, stderr] = await run(`${config.hg} branch`, {
+    cwd,
+    buffer: true,
+    verbose: false
+  });
+  return stdout.trim();
 }
