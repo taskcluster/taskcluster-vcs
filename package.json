@@ -9,7 +9,7 @@
   },
   "scripts": {
     "prepublish": "6to5 -s -e src --out-dir build",
-    "test": "./test/test.sh $(find test -name '*_test.js')"
+    "test": "mocha $(find test -name '*_test.js')"
   },
   "repository": {
     "type": "git",
