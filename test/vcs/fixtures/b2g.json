@@ -1,0 +1,32 @@
+[
+    {
+        "name": "fake-dalvik",
+        "path": "dalvik",
+        "revision": "master",
+        "remote": "git://github.com/mozilla-b2g/"
+    },
+    {
+        "name": "gaia.git",
+        "path": "gaia",
+        "revision": "master",
+        "remote": "https://git.mozilla.org/releases"
+    },
+    {
+        "name": "gecko.git",
+        "path": "gecko",
+        "revision": "master",
+        "remote": "https://git.mozilla.org/releases"
+    },
+    {
+        "name": "platform/abi/cpp",
+        "path": "abi/cpp",
+        "revision": "refs/tags/android-4.0.4_r2.1",
+        "remote": "git://codeaurora.org/"
+    },
+    {
+        "name": "darwinstreamingserver",
+        "path": "system/darwinstreamingserver",
+        "revision": "master",
+        "remote": "git://github.com/mozilla-b2g/"
+    }
+]

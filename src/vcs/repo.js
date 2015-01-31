@@ -10,6 +10,10 @@ import run from './run';
 import request from 'superagent-promise';
 import fs from 'mz/fs';
 import git from './git';
+import { parseString as _parseXML } from 'xml2js';
+import denodeify from 'denodeify';
+
+let parseXML = denodeify(_parseXML);
 
 const TEMP_MANIFEST_NAME = '.tc-vcs-manifest';
 
@@ -79,22 +83,64 @@ export async function sync(config, cwd, opts={}) {
 }
 
 /**
+List the projects within a given repo manifest.
+
+@param {Object} config for manifest.
+@param {String} path to manifest.xml on disk.
+*/
+export async function listManifestProjects(path) {
+  let content = await fs.readFile(path, 'utf8');
+  let { manifest } = await parseXML(content);
+
+  // For easier access create a dictionary of all the remotes...
+  let remotes = manifest.remote.reduce((result, v) => {
+    // root namespace...
+    let remote = v['$'];
+    result[remote.name] = remote;
+    return result;
+  }, {});
+
+  let defaultRemote;
+  // Find the default remote if available if there is no default then we must
+  // throw an error if we encounter a project with a "remote"
+  if (manifest['default']) {
+    defaultRemote = manifest['default'][0]['$'];
+    if (defaultRemote.remote) {
+      defaultRemote.fetch = remotes[defaultRemote.remote].fetch;
+    }
+  }
+
+  return manifest.project.map((v) => {
+    let project = v['$'];
+    if (!project) throw new Error('unknown or empty project...');
+    if (!project.name) throw new Error('Project must have a name...');
+    if (!project.path) throw new Error('Project must have a path...');
+
+    let remote = remotes[project.remote] || defaultRemote;
+    if (!remote) {
+      throw new Error(`Project ${project.name || 'unknown'} has no remote.`);
+    }
+
+    if (!remote.fetch) {
+      throw new Error(`${project.name}'s remote has no fetch.`);
+    }
+
+    return {
+      name: project.name,
+      path: project.path,
+      revision: project.revision || remote.revision || 'master',
+      remote: remote.fetch
+    }
+  });
+}
+
+/**
 Generate list of all projects with path / name and remote.
 */
 export async function list(config, cwd, opts={}) {
-  // Why??? Mainly to avoid parsing xml of manifest.
-  let [rawList] = await run(
-    './repo list', { cwd, buffer: true, verbose: false }
-  );
-
-  return await Promise.all(rawList.trim().split('\n').map(async (line) => {
-    let [path, name] = line.split(':');
-    let remote = await git.remoteUrl(config, fsPath.join(cwd, path.trim()));
-    // Do we want to consider adding the branch here?
-    return {
-      path: path.trim(),
-      name: name.trim(),
-      remote
-    };
-  }));
+  let manifestPath = fsPath.join(cwd, '.repo', 'manifest.xml');
+  if (!manifestPath) {
+    throw new Error(`Cannot list projects without manifest ${manifestPath}`);
+  }
+  return await listManifestProjects(manifestPath);
 }
