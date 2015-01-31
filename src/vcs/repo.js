@@ -9,6 +9,7 @@ import fsPath from 'path';
 import run from './run';
 import request from 'superagent-promise';
 import fs from 'mz/fs';
+import git from './git';
 
 const TEMP_MANIFEST_NAME = '.tc-vcs-manifest';
 
@@ -75,4 +76,25 @@ export async function sync(config, cwd, opts={}) {
   let repoPath = fsPath.join(cwd, 'repo');
   assert(await fs.exists(repoPath), `${repoPath} must exist`);
   await run(`./repo sync -j${opts.concurrency}`, { cwd });
+}
+
+/**
+Generate list of all projects with path / name and remote.
+*/
+export async function list(config, cwd, opts={}) {
+  // Why??? Mainly to avoid parsing xml of manifest.
+  let [rawList] = await run(
+    './repo list', { cwd, buffer: true, verbose: false }
+  );
+
+  return await Promise.all(rawList.trim().split('\n').map(async (line) => {
+    let [path, name] = line.split(':');
+    let remote = await git.remoteUrl(config, fsPath.join(cwd, path.trim()));
+    // Do we want to consider adding the branch here?
+    return {
+      path: path.trim(),
+      name: name.trim(),
+      remote
+    };
+  }));
 }
