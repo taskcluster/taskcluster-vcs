@@ -11,21 +11,51 @@ import vcsRepo from '../vcs/repo';
 
 import { Index, Queue } from 'taskcluster-client';
 
+const STATS_FILE = '.tc-vcs-cache-stats.json';
+
 // Used in read only fashion so no need to wait to construct...
 let queue = new Queue();
 let index = new Index();
 
+async function useProjectCaches(config, target, namespace, branch, projects) {
+  let start = Date.now();
+  let stats = {
+    start: new Date(),
+    duration: null,
+    projects: {}
+  };
+
+  await Promise.all(projects.map(async (project) => {
+    let start = Date.now();
+    let [taskId, cacheUrl] = await getProjectCache(
+      config, namespace, project.remote, branch
+    );
+
+    if (cacheUrl) {
+      await useCache(config, cacheUrl, target);
+    }
+
+    stats.projects[project.name] = {
+      duration: Date.now() - start,
+      taskId: taskId
+    };
+  }));
+
+  stats.duration = Date.now() - start;
+  stats.stop = new Date();
+  await fs.writeFile(
+    fsPath.join(target, '.repo', STATS_FILE),
+    JSON.stringify(stats, null, 2)
+  );
+}
+
 /**
 Determines if the clone has a cache if it does return a url do it.
 */
-async function getRepoCache(config, namespace, url) {
+async function getProjectCache(config, namespace, remote, branch) {
   // normalize the url to the "name"
-  let alias = urlAlias(url);
-  let namespace = [
-    namespace,
-    createHash(alias),
-    createHash(command)
-  ].join('.');
+  let alias = `${urlAlias(remote)}/${branch}`;
+  let namespace = `${namespace}.${createHash(alias)}`;
 
   let task;
   try {
@@ -33,15 +63,16 @@ async function getRepoCache(config, namespace, url) {
   } catch (e) {
     // 404 will throw so validate before returning null...
     if (e.code && e.code != 404) throw e;
-    return null;
+    return [];
   }
 
   // Note that unlike some other caches we do not cache repo data locally (at
   // least not yet...).
-  return queue.buildUrl(queue.getLatestArtifact,
+  let url = queue.buildUrl(queue.getLatestArtifact,
     task.taskId,
-    `public/${alias}-${createHash(command)}.tar.gz`
+    `public/${alias}.tar.gz`
   );
+  return [task.taskId, url];
 }
 
 async function useCache(config, url, dest) {
@@ -86,11 +117,17 @@ export default async function main(config, argv) {
   });
 
   parser.addArgument(['--namespace'], {
-    defaultValue: 'tc-vcs.v1.repo-init',
+    defaultValue: 'tc-vcs.v1.repo-project',
     help: `
       Namespace under Index to query should match the value set in
       create-clone-cache.
     `.trim()
+  });
+
+  parser.addArgument(['-b', '--branch'], {
+    dest: 'branch',
+    defaultValue: 'master',
+    help: 'branch argument to pass (-b) to repo init'
   });
 
   parser.addArgument(['-m', '--manifest'], {
@@ -156,7 +193,16 @@ export default async function main(config, argv) {
   await checkout(config, checkoutArgs);
 
   // Initialize the directory with the repo command...
-  await vcsRepo.init(config, args.directory, args.manifest);
+  await vcsRepo.init(config, args.directory, args.manifest, {
+    branch: args.branch
+  });
+
+  // Determine the list of projects...
+  let projects = await vcsRepo.list(config, args.directory);
+  await useProjectCaches(
+    config, args.directory, args.namespace, args.branch, projects
+  );
+
   // Update any sources created by the repo command...
   await vcsRepo.sync(config, args.directory);
 

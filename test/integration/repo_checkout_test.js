@@ -12,7 +12,6 @@ suite('repo-checkout', function() {
 
   let url = 'https://github.com/taskcluster/tc-vcs-repo-test';
   let dest = __dirname + '/clones/repo';
-  let manifest = `${dest}/sources.xml`
 
   async function clean() {
     await rm('./clones/');
@@ -22,7 +21,8 @@ suite('repo-checkout', function() {
   teardown(clean);
   setup(clean);
 
-  test.only('successful repo sync', async function () {
+  test('successful repo sync', async function () {
+    let manifest = 'sources.xml';
     await run([
       'repo-checkout', '-m', manifest, dest, url
     ]);
@@ -32,7 +32,8 @@ suite('repo-checkout', function() {
   });
 
   test('(cached) repo sync and resync', async function() {
-    let [namespace, taskId] = await repoCache(url, command);
+    let manifest = 'sources.xml';
+    let [namespace, taskId] = await repoCache(url, manifest);
 
     async function checkout() {
       await run([
@@ -41,16 +42,16 @@ suite('repo-checkout', function() {
         '-m', manifest, dest, url
       ]);
 
+      let statsUrl = fsPath.join(dest, '.repo', '.tc-vcs-cache-stats.json');
       let [rev] = await run(['revision', `${dest}/gittesting`]);
       assert.equal(rev, '3d8bd58cddfa558b78e947ed04ad8f9a3359ed73');
       assert.ok(
-        await fs.existsSync(fsPath.join(dest, '.repo', '.tc-vcs.json')),
+        await fs.existsSync(statsUrl),
         'uses cache'
       );
 
-      let cache = require(fsPath.join(dest, '.repo', '.tc-vcs.json'));
-      assert.equal(cache.command, command);
-      assert.equal(cache.taskId, taskId);
+      let cache = require(statsUrl);
+      assert.equal(cache.projects['gittesting'].taskId, taskId);
     }
 
     await checkout();
