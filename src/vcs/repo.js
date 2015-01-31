@@ -10,12 +10,20 @@ import run from './run';
 import request from 'superagent-promise';
 import fs from 'mz/fs';
 import git from './git';
+import URL from 'url';
 import { parseString as _parseXML } from 'xml2js';
 import denodeify from 'denodeify';
+import urljoin from 'url-join';
 
 let parseXML = denodeify(_parseXML);
 
 const TEMP_MANIFEST_NAME = '.tc-vcs-manifest';
+
+async function resolveManifestPath(cwd, path) {
+  if (URL.parse(path).protocol) return path;
+  if (await fs.exists(path)) return path;
+  return fsPath.join(cwd, path);
+}
 
 /**
 Initialize the "repo" using a custom manifest...
@@ -24,6 +32,7 @@ This logic is mostly taken from what the config.sh command does inside of b2g.
 */
 export async function init(config, cwd, manifest, opts={}) {
   opts = Object.assign({ branch: 'master' }, opts);
+  manifest = await resolveManifestPath(cwd, manifest);
 
   assert(await fs.exists(cwd), 'Must be run on an existing directory');
 
@@ -129,7 +138,7 @@ export async function listManifestProjects(path) {
       name: project.name,
       path: project.path,
       revision: project.revision || remote.revision || 'master',
-      remote: remote.fetch
+      remote: urljoin(remote.fetch, project.name)
     }
   });
 }
