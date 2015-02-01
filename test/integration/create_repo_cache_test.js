@@ -10,6 +10,7 @@ import repoCache from './repo_cache';
 import { Queue, Index } from 'taskcluster-client';
 
 suite('create repo cache', function() {
+  this.timeout('80s');
   let url = 'https://github.com/taskcluster/tc-vcs-repo-test';
   let queue = new Queue();
   let index = new Index();
@@ -33,6 +34,12 @@ suite('create repo cache', function() {
       `${namespace}.${hash(alias)}`
     );
     assert.equal(indexes.taskId, taskId);
+  });
+
+  test('multi-project cache', async function() {
+    let [namespace, taskId] = await repoCache(url, 'bigger.xml');
+    let { artifacts } = await queue.listArtifacts(taskId, 0);
+    console.log(JSON.stringify(artifacts));
   });
 });
 
