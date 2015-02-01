@@ -31,14 +31,22 @@ async function useProjectCaches(config, target, namespace, branch, projects) {
 
   await Promise.all(projects.map(async (project) => {
     let projectStart = Date.now();
-    let name = `${urlAlias(project.remote)}/${branch}`;
-    let cachePath = await getProjectCache(config, namespace, name);
+    let repoPath =
+      fsPath.join(target, '.repo', 'projects', `${project.path}.git`);
 
-    if (cachePath) {
-      await run(render(config.repoCache.extract, {
-        source: cachePath,
-        dest: target
-      }));
+    // Only attempt to use caches if the project does not exist... Tar will
+    // happy clobber things that likely should not be clobbered if expansion is
+    // triggered from the cache...
+    if (!await fs.exists(repoPath)) {
+      let name = `${urlAlias(project.remote)}/${branch}`;
+      let cachePath = await getProjectCache(config, namespace, name);
+
+      if (cachePath) {
+        await run(render(config.repoCache.extract, {
+          source: cachePath,
+          dest: target
+        }));
+      }
     }
 
     await vcsRepo.sync(config, target, {
