@@ -43,15 +43,21 @@ suite('repo-checkout', function() {
       ]);
 
       let statsUrl = fsPath.join(dest, '.repo', '.tc-vcs-cache-stats.json');
+
+      let alias = 'bitbucket.org/lightsofapollo/gittesting/master';
+      let cachePath = `${__dirname}/../cache/repo/sources/${alias}.tar.gz`;
+      assert.ok(await fs.exists(cachePath), 'cache exists...');
+
       let [rev] = await run(['revision', `${dest}/gittesting`]);
       assert.equal(rev, '3d8bd58cddfa558b78e947ed04ad8f9a3359ed73');
+
       assert.ok(
         await fs.existsSync(statsUrl),
         'uses cache'
       );
 
       let cache = require(statsUrl);
-      assert.equal(cache.projects['gittesting'].taskId, taskId);
+      assert.ok(cache.projects['gittesting']);
     }
 
     await checkout();

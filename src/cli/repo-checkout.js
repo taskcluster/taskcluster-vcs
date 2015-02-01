@@ -6,8 +6,12 @@ import fs from 'mz/fs';
 import fsPath from 'path';
 import temp from 'promised-temp';
 import urlAlias from '../vcs/url_alias';
+import denodeify from 'denodeify';
 import createHash from '../hash';
 import vcsRepo from '../vcs/repo';
+import _mkdirp from 'mkdirp';
+
+let mkdirp = denodeify(_mkdirp);
 
 import { Index, Queue } from 'taskcluster-client';
 
@@ -27,12 +31,14 @@ async function useProjectCaches(config, target, namespace, branch, projects) {
 
   await Promise.all(projects.map(async (project) => {
     let projectStart = Date.now();
-    let [taskId, cacheUrl] = await getProjectCache(
-      config, namespace, project.remote, branch
-    );
+    let name = `${urlAlias(project.remote)}/${branch}`;
+    let cachePath = await getProjectCache(config, namespace, name);
 
-    if (cacheUrl) {
-      await useCache(config, cacheUrl, target);
+    if (cachePath) {
+      await run(render(config.repoCache.extract, {
+        source: cachePath,
+        dest: target
+      }));
     }
 
     await vcsRepo.sync(config, target, {
@@ -40,8 +46,7 @@ async function useProjectCaches(config, target, namespace, branch, projects) {
     });
 
     stats.projects[project.name] = {
-      duration: Date.now() - projectStart,
-      taskId: taskId
+      duration: Date.now() - projectStart
     };
   }));
 
@@ -53,13 +58,38 @@ async function useProjectCaches(config, target, namespace, branch, projects) {
   );
 }
 
+async function getProjectCache(config, namespace, name) {
+  let localPath = getCachePath(config, name);
+  if (await fs.exists(localPath)) return localPath;
+
+  let remoteUrl = await checkRemoteProjectCache(config, namespace, name);
+  if (remoteUrl) {
+    // Ensure directory exists...
+    let dirname = fsPath.dirname(localPath);
+    await mkdirp(dirname);
+    await run(render(config.repoCache.get, {
+      url: remoteUrl,
+      dest: localPath
+    }));
+    return localPath;
+  }
+  return null;
+}
+
+function getCachePath(config, name) {
+  let root = render(config.repoCache.cacheDir, { env: process.env });
+  return fsPath.join(
+    root,
+    render(config.repoCache.cacheName, { name })
+  );
+}
+
 /**
 Determines if the clone has a cache if it does return a url do it.
 */
-async function getProjectCache(config, namespace, remote, branch) {
+async function checkRemoteProjectCache(config, namespace, name) {
   // normalize the url to the "name"
-  let alias = `${urlAlias(remote)}/${branch}`;
-  let namespace = `${namespace}.${createHash(alias)}`;
+  let namespace = `${namespace}.${createHash(name)}`;
 
   let task;
   try {
@@ -67,38 +97,16 @@ async function getProjectCache(config, namespace, remote, branch) {
   } catch (e) {
     // 404 will throw so validate before returning null...
     if (e.code && e.code != 404) throw e;
-    return [];
+    return null;
   }
 
   // Note that unlike some other caches we do not cache repo data locally (at
   // least not yet...).
   let url = queue.buildUrl(queue.getLatestArtifact,
     task.taskId,
-    `public/${alias}.tar.gz`
+    `public/${name}.tar.gz`
   );
-  return [task.taskId, url];
-}
-
-async function useCache(config, url, dest) {
-  let tempPath = temp.path();
-  try {
-    await run(render(config.repoCache.get, {
-      url: url,
-      dest: tempPath
-    }));
-
-    await run(render(config.repoCache.extract, {
-      source: tempPath,
-      dest
-    }));
-  } catch (e) {
-    throw e;
-  } finally {
-    // Ensure we clean up the temp file it may be massive!
-    if (await fs.exists(tempPath)) {
-      await fs.unlink(tempPath);
-    }
-  }
+  return url;
 }
 
 export default async function main(config, argv) {

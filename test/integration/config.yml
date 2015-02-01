@@ -1,2 +1,4 @@
 cloneCache:
   cacheDir: '{{env.TC_VCS_HOME}}'
+repoCache:
+  cacheDir: '{{env.TC_VCS_HOME}}/repo/'

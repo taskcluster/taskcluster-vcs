@@ -4,6 +4,10 @@ git: git
 hg: hg
 
 repoCache:
+  # The root where all downloaded cache files are stored on the local machine...
+  cacheDir: '{{env.HOME}}/.tc-vcs-repo/'
+  # Name/prefixed used as part of the base url.
+  cacheName: sources/{{name}}.tar.gz
   # Command used to upload the tarball
   uploadTar: "curl --header 'Content-Type: application/x-tar' --header 'Content-Encoding: gzip' -X PUT --retry-delay 2 --retry 5 --data-binary @'{{source}}' '{{url}}'"
   # Large http get requests are often slower using nodes built in http layer so
