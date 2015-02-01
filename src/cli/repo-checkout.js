@@ -203,8 +203,13 @@ export default async function main(config, argv) {
     config, args.directory, args.namespace, args.branch, projects
   );
 
-  // Update any sources created by the repo command...
-  await vcsRepo.sync(config, args.directory);
+  // As potential optimization run sync commands for each project
+  // individually...
+  await Promise.all(projects.map(async (project) => {
+    await vcsRepo.sync(config, args.directory, {
+      project: project.name
+    });
+  }));
 
   if (!await fs.exists(fsPath.join(args.directory, '.repo'))) {
     console.error(`${args.command} ran but did not generate a .repo directory`);

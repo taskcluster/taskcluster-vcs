@@ -71,16 +71,25 @@ export async function init(config, cwd, manifest, opts={}) {
   await run(`git branch -m ${opts.branch}`, { cwd: manifestRepo });
 
   // Initialize the manifests...
-  //await run(`rm -Rf .repo/manifest*`);
   await run(
     `./repo init -b ${opts.branch} -u ${manifestRepo} -m manifest.xml`, 
     { cwd }
   );
+
+  // XXX: This is an interesting hack to work around the fact that if these
+  // files are present ./repo sync will attempt to copy/write to them which
+  // will cause races preventing us from safely calling sync concurrently.
+  let hooksPath = fsPath.join(cwd, '.repo', 'repo', 'hooks');
+  let hooks = await fs.readdir(hooksPath);
+  await Promise.all(hooks.map(async (hook) => {
+    await fs.unlink(fsPath.join(hooksPath, hook));
+  }));
 }
 
 export async function sync(config, cwd, opts={}) {
   opts = Object.assign({
-    concurrency: 100
+    concurrency: 100,
+    project: null
   }, opts);
 
   assert(await fs.exists(cwd), 'Must be run on an existing directory');
@@ -88,7 +97,10 @@ export async function sync(config, cwd, opts={}) {
   // Ensure the "repo" binary is available...
   let repoPath = fsPath.join(cwd, 'repo');
   assert(await fs.exists(repoPath), `${repoPath} must exist`);
-  await run(`./repo sync -j${opts.concurrency}`, { cwd });
+
+  let cmd = `./repo sync -j${opts.concurrency}`;
+  if (opts.project) cmd += ` ${opts.project}`;
+  await run(cmd, { cwd });
 }
 
 export async function resolveManifestIncludes(path, manifest, seen) {
