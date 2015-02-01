@@ -30,7 +30,7 @@ Initialize the "repo" using a custom manifest...
 
 This logic is mostly taken from what the config.sh command does inside of b2g.
 */
-export async function init(config, cwd, manifest, opts={}) {
+export async function init(cwd, manifest, opts={}) {
   opts = Object.assign({ branch: 'master' }, opts);
   manifest = await resolveManifestPath(cwd, manifest);
 
@@ -86,7 +86,7 @@ export async function init(config, cwd, manifest, opts={}) {
   }));
 }
 
-export async function sync(config, cwd, opts={}) {
+export async function sync(cwd, opts={}) {
   opts = Object.assign({
     concurrency: 100,
     project: null
@@ -148,7 +148,6 @@ export async function resolveManifestIncludes(path, manifest, seen) {
 /**
 List the projects within a given repo manifest.
 
-@param {Object} config for manifest.
 @param {String} path to manifest.xml on disk.
 */
 export async function listManifestProjects(path) {
@@ -201,7 +200,7 @@ export async function listManifestProjects(path) {
 /**
 Generate list of all projects with path / name and remote.
 */
-export async function list(config, cwd, opts={}) {
+export async function list(cwd, opts={}) {
   let manifestPath = fsPath.join(cwd, '.repo', 'manifest.xml');
   if (!manifestPath) {
     throw new Error(`Cannot list projects without manifest ${manifestPath}`);

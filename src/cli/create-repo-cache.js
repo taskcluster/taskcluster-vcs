@@ -127,7 +127,7 @@ export default async function main(config, argv) {
   let index = clitools.getTcIndex(args.proxy);
 
   // Get a list of the projects so we can build the tars...
-  let projects = await vcsRepo.list(config, workspace);
+  let projects = await vcsRepo.list(workspace);
 
   // Configs for the taskcluster helper functions
   let tcConfig = {
