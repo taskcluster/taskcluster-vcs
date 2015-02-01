@@ -8,14 +8,9 @@ import fsPath from 'path';
 import denodeify from 'denodeify';
 import createHash from '../hash';
 import urlAlias from '../vcs/url_alias';
+import * as clitools from '../clitools';
 
 let mkdirp = denodeify(_mkdirp);
-
-import { Index, Queue } from 'taskcluster-client';
-
-// Used in read only fashion so no need to wait to construct...
-let queue = new Queue();
-let index = new Index();
 
 /**
 Determines if the clone has a cache if it does return a url do it.
@@ -28,21 +23,12 @@ async function getCloneCache(config, namespace, url) {
     { name: alias }
   );
 
-  let namespace = `${namespace}.${createHash(alias)}`;
-  let task;
-
-  try {
-    task = await index.findTask(namespace);
-  } catch (e) {
-    // 404 will throw so validate before returning null...
-    if (e.code && e.code != 404) throw e;
-    return null;
-  }
-
-  let cacheUrl = queue.buildUrl(queue.getLatestArtifact,
-    task.taskId,
+  let cacheUrl = await clitools.lookupIndexArtifact(
+    `${namespace}.${createHash(alias)}`,
     `public/${alias}.tar.gz`
   );
+
+  if (!cacheUrl) return;
 
   let cacheDir = render(config.cloneCache.cacheDir, {
     env: process.env

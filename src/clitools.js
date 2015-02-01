@@ -29,6 +29,22 @@ export function getTcIndex(proxy=false) {
   return new Index(options);
 }
 
+export async function lookupIndexArtifact(namespace, artifact) {
+  let index = getTcIndex();
+  let queue = getTcQueue();
+  let task;
+
+  try {
+    task = await index.findTask(namespace);
+  } catch (e) {
+    // 404 will throw so validate before returning null...
+    if (e.code && e.code != 404) throw e;
+    return null;
+  }
+
+  return queue.buildUrl(queue.getLatestArtifact, task.taskId, artifact);
+}
+
 // Shared argument types in a dict to be a little more expilict...
 export let arg = {
   // All functions take a single argument a ArgumentParser
