@@ -15,7 +15,6 @@ import { Index, Queue } from 'taskcluster-client';
 
 async function createTar(config, cwd, project) {
   let dest = temp.path();
-  console.log(project)
   let projectPath =
     fsPath.join('.repo', 'projects', `${project.path}.git`);
 
