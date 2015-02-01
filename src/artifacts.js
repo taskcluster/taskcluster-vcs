@@ -2,8 +2,14 @@ import run from './vcs/run';
 import render from 'json-templater/string';
 import fs from 'mz/fs';
 import fsPath from 'path';
+import denodeify from 'denodeify';
+import mkdirp_ from 'mkdirp';
+import assert from 'assert';
+import ms from 'ms';
 
 import { Index, Queue } from 'taskcluster-client';
+
+let mkdirp = denodeify(mkdirp_);
 
 /**
 The logic if how artifacts are found and stored is kept here and utilized by
@@ -91,13 +97,93 @@ export default class Artifacts {
     }));
   }
 
+  async upload(source, url) {
+    assert(await fs.exists(source), `${source} must exist`);
+    await run(render(this.config.uploadTar, {
+      source, url
+    }));
+  }
+
   /**
   Extract the tars!
   */
   async extract(source, dest) {
+    assert(await fs.exists(source), `${source} must exist to extract...`);
+    assert(dest, 'must pass dest...');
     await run(render(this.config.extract, {
       source,
       dest
     }));
+  }
+
+  /**
+  Note: This method _requires_ you to have created the local artifact first.
+  */
+  async indexAndUploadArtifact(name, namespace, options) {
+    let localPath = this.lookupLocal(name);
+    assert(
+      await fs.exists(localPath),
+      `Artifact (${localPath}) must exist locally first did you call createLocalArtifact?`
+    );
+
+    options = Object.assign({
+      taskId: process.env.TASK_ID,
+      runId: process.env.RUN_ID,
+      expires: new Date(Date.now() + ms('30 days')),
+      rank: Date.now()
+    }, options);
+
+    assert(options.taskId, 'must pass taskId');
+    assert(options.runId, 'must pass runId');
+
+    let artifact = await this.queue.createArtifact(
+      options.taskId,
+      options.runId,
+      this.nameToArtifact(name),
+      {
+        storageType: 's3',
+        expires: options.expires,
+        contentType: 'application/x-tar'
+      }
+    );
+
+    await this.upload(localPath, artifact.putUrl);
+
+    await this.index.insertTask(namespace, {
+      taskId: options.taskId,
+      // Note: While we _can_ determine a few useful different ways of ranking a
+      // single repository (number of commits, last date of commit, etc...) using
+      // a simple Date.now + a periodic caching system is likely to yield better
+      // results with similar amount of churn...
+      rank: options.rank,
+      data: {},
+      expires: options.expires
+    });
+  }
+
+  /**
+  Given the name of an artifact create it locally (compressing files).
+
+  @param {String} name of artifact.
+  @param {String} cwd where to run compression (important for tar paths).
+  @param {String} ...files to compress.
+  @return {String} path to artifact.
+  */
+  async createLocalArtifact(name, cwd, ...files) {
+    let path = this.lookupLocal(name);
+    await mkdirp(fsPath.dirname(path));
+
+    await Promise.all(files.map(async (file) => {
+      let path = fsPath.join(cwd, file);
+      assert(await fs.exists(path), `Missign file in artifact path (${path})`);
+    }));
+
+    let cmd = render(this.config.compress, {
+      source: files.join(' '),
+      dest: path
+    });
+
+    await run(cmd, { cwd });
+    return path;
   }
 }

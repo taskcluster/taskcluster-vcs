@@ -30,7 +30,8 @@ async function useProjectCaches(artifacts, target, namespace, branch, projects) 
 
       await artifacts.useIfAvailable(
         name,
-        `${namespace}.${createHash(name)}`
+        `${namespace}.${createHash(name)}`,
+        target
       );
     }
 

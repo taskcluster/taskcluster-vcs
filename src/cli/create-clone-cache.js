@@ -1,29 +1,13 @@
 import { ArgumentParser } from 'argparse';
 import checkout from './checkout';
-import temp from 'promised-temp';
-import render from 'json-templater/string';
-import fs from 'mz/fs';
 import fsPath from 'path';
 import urlAlias from '../vcs/url_alias';
 import createHash from '../hash';
 import run from '../vcs/run';
+import temp from 'promised-temp';
+import Artifacts from '../artifacts';
 
 import * as clitools from '../clitools';
-
-async function createTar(config, source, dest) {
-  let cwd = fsPath.dirname(source);
-  let dir = fsPath.basename(source);
-
-  await run(render(config.cloneCache.compress, { source: dir, dest }), {
-    cwd,
-  });
-}
-
-async function uploadTar(config, source, url) {
-  await run(render(config.cloneCache.uploadTar, {
-    source, url
-  }));
-}
 
 export default async function main(config, argv) {
   let parser = new ArgumentParser({
@@ -60,39 +44,24 @@ export default async function main(config, argv) {
 
   let queue = clitools.getTcQueue(args.proxy);
   let index = clitools.getTcIndex(args.proxy);
-
-  let tarPath = temp.path('tc-vcs-create-clone-cache-tar');
-  await createTar(config, dir, tarPath);
+  let artifacts = new Artifacts(config.cloneCache, queue, index);
 
   let alias = urlAlias(args.url);
-
-  let artifact = await queue.createArtifact(
-    args.taskId,
-    args.runId,
-    `public/${alias}.tar.gz`,
+  await artifacts.createLocalArtifact(
+    alias,
+    fsPath.dirname(dir),
+    fsPath.basename(dir)
+  );
+  await artifacts.indexAndUploadArtifact(
+    alias,
+    `${args.namespace}.${createHash(alias)}`,
     {
-      storageType: 's3',
-      expires: args.expires,
-      contentType: 'application/x-tar'
+      taskId: args.taskId,
+      runId: args.runId,
+      expires: args.expires
     }
   );
 
-  await uploadTar(config, tarPath, artifact.putUrl);
-
-  let hash = createHash(alias);
-  let namespace = `${args.namespace}.${hash}`;
-
-  await index.insertTask(namespace, {
-    taskId: args.taskId,
-    // Note: While we _can_ determine a few useful different ways of ranking a
-    // single repository (number of commits, last date of commit, etc...) using
-    // a simple Date.now + a periodic caching system is likely to yield better
-    // results with similar amount of churn...
-    rank: Date.now(),
-    data: {},
-    expires: args.expires
-  });
-
   // cleanup after ourselves...
-  await run(`rm -rf ${dir} ${tarPath}`)
+  await run(`rm -rf ${dir}`)
 }
