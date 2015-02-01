@@ -183,7 +183,7 @@ export default async function main(config, argv) {
   };
 
   // Tar files to remove after this operation...
-  let tarsToRemove = [];
+  let tarsToRemove = [workspace];
 
   await Promise.all(projects.map(async (project) => {
     let alias = urlAlias(project.remote);
