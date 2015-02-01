@@ -29,8 +29,34 @@ export function getTcIndex(proxy=false) {
   return new Index(options);
 }
 
+/**
+Defines the taskcluster upload arguments in a argument group.
+*/
+export function taskclusterGroup(parser) {
+  return parser.addArgumentGroup({
+    title: 'Taskcluster Artifacts',
+    description: `
+      To create remote caches taskcluster credentials (usually in the form of
+      environment variables) are required. This must be enabled via the use
+      of the --upload flag some of these arguments are required if --upload is
+      used (such as --task-id and --run-id).
+    `.trim()
+  });
+}
+
 // Shared argument types in a dict to be a little more expilict...
 export let arg = {
+  upload(parser) {
+    parser.addArgument(['--upload'], {
+      action: 'storeTrue',
+      defaultValue: false,
+      help: `
+        When this is set artifacts will be stored locally _and_ uploaded to 
+        taskcluster (to the given task id) then indexed.
+      `.trim()
+    });
+  },
+
   // All functions take a single argument a ArgumentParser
   taskId(parser) {
     parser.addArgument(['--task-id'], {

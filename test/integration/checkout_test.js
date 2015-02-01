@@ -3,25 +3,16 @@ import run from './run';
 import fs from 'mz/fs';
 import assert from 'assert';
 import mkdirp from 'mkdirp';
-import cloneCache from './clone_cache';
 
 suite('checkout', function() {
-  async function clean() {
-    await rm('./clones/')
-    mkdirp.sync(__dirname + '/clones');
-  }
-
-  teardown(clean);
-  setup(clean);
-
   test('checkout in directory which is not controlled by a vcs', async function() {
-    let dest = `${__dirname}/clones/tc-vcs-cache`;
-    await fs.mkdir(dest);
+    // Simply clone to "home" since we expect this to implode anyway...
+    await fs.mkdir(this.home);
 
     try {
       await run([
         'checkout',
-        dest,
+        this.home,
         'https://github.com/lightsofapollo/tc-vcs-cache',
         'https://github.com/lightsofapollo/tc-vcs-cache',
         'master',
@@ -36,8 +27,8 @@ suite('checkout', function() {
   });
 
   test('checkout fresh then checkout again', async function () {
-    let url = 'https://github.com/lightsofapollo/tc-vcs-cache'
-    let dest = `${__dirname}/clones/tc-vcs-cache`;
+    let url = 'https://github.com/lightsofapollo/tc-vcs-cache';
+    let dest = `${this.home}/clones/tc-vcs-cache`;
 
     async function checkout() {
       await run([
@@ -61,13 +52,12 @@ suite('checkout', function() {
 
   test('(with cache) checkout fresh then checkout again', async function () {
     let url = 'https://github.com/lightsofapollo/tc-vcs-cache'
-    let dest = `${__dirname}/clones/tc-vcs-cache`;
-    let [namespace] = await cloneCache(url);
+    let dest = `${this.home}/clones/tc-vcs-cache`;
+    await run(['create-clone-cache', url]);
 
     async function checkout() {
       await run([
         'checkout',
-        '--namespace', namespace,
         dest,
         url,
         url,
@@ -88,7 +78,7 @@ suite('checkout', function() {
 
   test('(with defaults) checkout fresh', async function () {
     let url = 'https://github.com/lightsofapollo/tc-vcs-cache'
-    let dest = `${__dirname}/clones/tc-vcs-cache`;
+    let dest = `${this.home}/clones/tc-vcs-cache`;
     await run([
       'checkout',
       dest,

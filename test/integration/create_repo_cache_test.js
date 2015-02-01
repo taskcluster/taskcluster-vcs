@@ -5,7 +5,8 @@ import fsPath from 'path';
 import assert from 'assert';
 import mkdirp from 'mkdirp';
 import hash from '../../src/hash';
-import repoCache from './repo_cache';
+import slugid from 'slugid';
+import createTask from './taskcluster';
 
 import { Queue, Index } from 'taskcluster-client';
 
@@ -15,31 +16,43 @@ suite('create repo cache', function() {
   let queue = new Queue();
   let index = new Index();
 
-  async function clean() {
-    await rm('./clones/')
-    mkdirp.sync(__dirname + '/clones');
-  }
-
-  teardown(clean);
-  setup(clean);
-
   test('create cache', async function() {
-    let alias = 'bitbucket.org/lightsofapollo/gittesting/master';
-    let expectedName = `public/${alias}.tar.gz`;
-    let [namespace, taskId] = await repoCache(url, 'sources.xml');
-    let { artifacts } = await queue.listArtifacts(taskId, 0);
-    assert.equal(artifacts.length, 1, 'has artifacts...');
-    assert.equal(artifacts[0].name, expectedName);
-    let indexes = await index.findTask(
-      `${namespace}.${hash(alias)}`
-    );
-    assert.equal(indexes.taskId, taskId);
+    let source = 'bitbucket.org/lightsofapollo/gittesting/master';
+    await run(['create-repo-cache', url, 'sources.xml']);
+    assert(fs.exists(`${this.home}/repo/sources/${source}.tar.gz`));
   });
 
   test('multi-project cache', async function() {
-    let [namespace, taskId] = await repoCache(url, 'bigger.xml');
+    let projects = [
+      'bitbucket.org/lightsofapollo/gittesting/master',
+      'github.com/lightsofapollo/repo-gittesting/master'
+    ];
+
+    let namespace = 'public.test.jlal.' + slugid.v4();
+    let taskId = await createTask();
+    await run([
+      'create-repo-cache',
+      '--upload',
+      '--namespace', namespace,
+      '--task-id', taskId,
+      '--expires', '5 min',
+      '--run-id', 0,
+      url, 'bigger.xml'
+    ]);
+
     let { artifacts } = await queue.listArtifacts(taskId, 0);
-    console.log(JSON.stringify(artifacts));
+    let names = artifacts.map((v) => {
+      return v.name
+    });
+
+    assert.deepEqual(names, projects.map((v) => {
+      return `public/${v}.tar.gz`
+    }));
+
+    await Promise.all(projects.map(async (v) => {
+      let task = await index.findTask(`${namespace}.${hash(v)}`);
+      assert.equal(task.taskId, taskId);
+    }))
   });
 });
 

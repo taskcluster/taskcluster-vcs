@@ -17,28 +17,22 @@ export default async function main(config, argv) {
     addHelp: true,
     description: `
       Clones (using the cache if possible) and updates the given repository to
-      the current tip of the default branch. After clone/update the index will
-      be updated to point to the given task and rank updated to current utc time.
+      the current tip of the default branch.
 
-      This primary way this is different from create-clone-cache is the use of
-      repo-checkout and the caching of _only_ the .repo folder...
+      Each "project" that is part of the repo manifest will be cached.
     `.trim()
   });
 
+  let tcArgs = clitools.taskclusterGroup(parser);
+
   // Shared arguments....
-  ['taskId', 'runId', 'expires', 'proxy'].forEach((name) => {
-    clitools.arg[name](parser);
+  ['upload', 'taskId', 'runId', 'expires', 'proxy'].forEach((name) => {
+    clitools.arg[name](tcArgs);
   });
 
-  parser.addArgument(['--namespace'], {
+  tcArgs.addArgument(['--namespace'], {
     defaultValue: 'tc-vcs.v1.repo-project',
     help: 'Taskcluster Index namespace'
-  });
-
-  parser.addArgument(['-m', '--manifest'], {
-    dest: 'manifest',
-    help: 'Manifest path',
-    required: true
   });
 
   parser.addArgument(['-b', '--branch'], {
@@ -51,6 +45,12 @@ export default async function main(config, argv) {
     help: 'url which to clone from'
   });
 
+  parser.addArgument(['manifest'], {
+    help: `
+      local path or URL to the manifest.
+    `
+  });
+
   // configuration for clone/update....
   let args = parser.parseArgs(argv);
   let queue = clitools.getTcQueue(args.proxy);
@@ -60,9 +60,8 @@ export default async function main(config, argv) {
 
   // Clone and update cache...
   await repoCheckout(config, [
-    workspace, args.url,
+    workspace, args.url, args.manifest,
     '--namespace', args.namespace,
-    '--manifest', args.manifest,
     '--branch', args.branch
   ]);
 
@@ -91,11 +90,13 @@ export default async function main(config, argv) {
       name, workspace, projectPath, objectsPath
     );
 
-    await artifacts.indexAndUploadArtifact(name, projectNamespace, {
-      taskId: args.taskId,
-      runId: args.runId,
-      expires: args.expires
-    });
+    if (args.upload) {
+      await artifacts.indexAndUploadArtifact(name, projectNamespace, {
+        taskId: args.taskId,
+        runId: args.runId,
+        expires: args.expires
+      });
+    }
   }));
 
   // Cleanup after ourselves...

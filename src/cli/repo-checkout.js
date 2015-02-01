@@ -83,14 +83,6 @@ export default async function main(config, argv) {
     help: 'branch argument to pass (-b) to repo init'
   });
 
-  parser.addArgument(['-m', '--manifest'], {
-    required: true,
-    dest: 'manifest',
-    help: `
-      Manifest xml file to use to initialize repo.
-    `
-  });
-
   parser.addArgument(['directory'], {
     type: (value) => {
       return fsPath.resolve(value);
@@ -100,6 +92,12 @@ export default async function main(config, argv) {
 
   parser.addArgument(['baseUrl'], {
     help: 'Base repository to clone',
+  });
+
+  parser.addArgument(['manifest'], {
+    help: `
+      Manifest path or url used to initialize repo.
+    `
   });
 
   parser.addArgument(['headUrl'], {

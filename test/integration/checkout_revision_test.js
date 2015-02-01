@@ -3,32 +3,22 @@ import run from './run';
 import fs from 'mz/fs';
 import assert from 'assert';
 import mkdirp from 'mkdirp';
-import cloneCache from './clone_cache';
 
 suite('checkout-revision', function() {
-  async function clean() {
-    await rm('./clones/')
-    mkdirp.sync(__dirname + '/clones');
-  }
-
-  teardown(clean);
-  setup(clean);
-
   test('(git) cached -> then update', async function () {
-    let url = 'https://github.com/lightsofapollo/tc-vcs-cache'
-    let [namespace] = await cloneCache(url);
-    let dest = __dirname + '/clones/git-checkout-revision/';
+    let alias = 'github.com/lightsofapollo/tc-vcs-cache';
+    let url = `https://${alias}`;
+    await run(['create-clone-cache', url]);
+
+    let dest =  `${this.home}/clones/git-checkout-revision/`;
     await run([
       'clone',
-      '--namespace', namespace,
       url,
       dest
     ]);
     assert((await fs.exists(dest)), 'path exists');
 
-    let cachePath = __dirname + '/../cache/' +
-                    'clones/github.com/lightsofapollo/tc-vcs-cache.tar.gz';
-
+    let cachePath = `${this.home}/clones/${alias}.tar.gz`
     assert.ok((await fs.exists(cachePath)), 'cache was correctly downloaded');
 
     await run([
@@ -47,20 +37,19 @@ suite('checkout-revision', function() {
   });
 
   test('(hg) cached -> then update', async function () {
-    let url = 'https://bitbucket.org/lightsofapollo/hgcache';
-    let [namespace] = await cloneCache(url);
-    let dest = __dirname + '/clones/hg-checkout-revision/';
+    let alias = 'bitbucket.org/lightsofapollo/hgcache';
+    let url = `https://${alias}`;
+    await run(['create-clone-cache', url]);
+
+    let dest = `${this.home}/clones/hg-checkout-revision`;
     await run([
       'clone',
-      '--namespace', namespace,
       url,
       dest
     ]);
     assert((await fs.exists(dest)), 'path exists');
 
-    let cachePath = __dirname + '/../cache/' +
-                    'clones/bitbucket.org/lightsofapollo/hgcache.tar.gz';
-
+    let cachePath = `${this.home}/clones/${alias}.tar.gz`
     assert.ok((await fs.exists(cachePath)), 'cache was correctly downloaded');
 
     await run([

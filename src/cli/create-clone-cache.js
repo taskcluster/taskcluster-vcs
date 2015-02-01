@@ -21,12 +21,14 @@ export default async function main(config, argv) {
     `.trim()
   });
 
+  let tcArgs = clitools.taskclusterGroup(parser);
+
   // Shared arguments....
-  ['taskId', 'runId', 'expires', 'proxy'].forEach((name) => {
-    clitools.arg[name](parser);
+  ['upload', 'taskId', 'runId', 'expires', 'proxy'].forEach((name) => {
+    clitools.arg[name](tcArgs);
   });
 
-  parser.addArgument(['--namespace'], {
+  tcArgs.addArgument(['--namespace'], {
     defaultValue: 'tc-vcs.v1.clones',
     help: 'Taskcluster Index namespace'
   });
@@ -52,15 +54,18 @@ export default async function main(config, argv) {
     fsPath.dirname(dir),
     fsPath.basename(dir)
   );
-  await artifacts.indexAndUploadArtifact(
-    alias,
-    `${args.namespace}.${createHash(alias)}`,
-    {
-      taskId: args.taskId,
-      runId: args.runId,
-      expires: args.expires
-    }
-  );
+
+  if (args.upload) {
+    await artifacts.indexAndUploadArtifact(
+      alias,
+      `${args.namespace}.${createHash(alias)}`,
+      {
+        taskId: args.taskId,
+        runId: args.runId,
+        expires: args.expires
+      }
+    );
+  }
 
   // cleanup after ourselves...
   await run(`rm -rf ${dir}`)
