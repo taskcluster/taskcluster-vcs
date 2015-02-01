@@ -26,7 +26,7 @@ async function useProjectCaches(config, target, namespace, branch, projects) {
   };
 
   await Promise.all(projects.map(async (project) => {
-    let start = Date.now();
+    let projectStart = Date.now();
     let [taskId, cacheUrl] = await getProjectCache(
       config, namespace, project.remote, branch
     );
@@ -35,14 +35,14 @@ async function useProjectCaches(config, target, namespace, branch, projects) {
       await useCache(config, cacheUrl, target);
     }
 
-    stats.projects[project.name] = {
-      duration: Date.now() - start,
-      taskId: taskId
-    };
-
     await vcsRepo.sync(config, target, {
       project: project.name
     });
+
+    stats.projects[project.name] = {
+      duration: Date.now() - projectStart,
+      taskId: taskId
+    };
   }));
 
   stats.duration = Date.now() - start;
