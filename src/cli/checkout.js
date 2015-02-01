@@ -25,13 +25,13 @@ export default async function main(config, argv) {
 
       Examples:\n
 
-      (clone gaia)
+      (clone gaia into gaia directory with latest version of master)
 
-      tc-vcs checkout https://github.com/mozilla-b2g/gaia https://github.com/mozilla-b2g/gaia master master gaia_dir
+      tc-vcs checkout gaia https://github.com/mozilla-b2g/gaia
 
       (clone a revision of try)
 
-      tc-vcs checkout https://hg.mozilla.org/mozilla-central https://hg.mozilla.org/try $REV $REV try_dir
+      tc-vcs checkout try https://hg.mozilla.org/mozilla-central https://hg.mozilla.org/try $REV $REV
 
     `
   });
