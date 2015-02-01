@@ -57,7 +57,7 @@ export async function init(config, cwd, manifest, opts={}) {
     manifestContent = await fs.readFile(manifest, 'utf8');
   } else {
     // Otherwise try over http...
-    let res = await requst.get(manifest).buffer(true).end();
+    let res = await request.get(manifest).buffer(true).end();
     if (res.error) throw res.error;
     manifestContent = res.text;
   }
