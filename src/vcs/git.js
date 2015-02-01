@@ -22,12 +22,47 @@ export async function checkoutRevision(config, cwd, repository, ref, rev) {
   await run(`${config.git} checkout ${rev}`, { cwd });
 }
 
-export async function remoteUrl(config, cwd) {
+/**
+Fetch all configs from a git repo...
+*/
+async function getConfig(config, cwd) {
   let [stdout] = await run(
-    `${config.git} config --get remote.origin.url`,
+    `${config.git} config --list`,
     { cwd, verbose: false, buffer: true }
   );
-  return stdout.trim();
+
+  // Parse the git config list into key/value pairs...
+  return stdout.trim().split('\n').reduce((result, v) => {
+    let assignment = v.indexOf('=');
+    if (assignment === -1) return result;
+    let name = v.slice(0, assignment);
+    let value = v.slice(assignment + 1);
+    result[name] = value;
+    return result;
+  }, {});
+}
+
+export async function remoteUrl(config, cwd) {
+  let [branch, gitConfig] = await Promise.all([
+    branchName(config, cwd),
+    getConfig(config, cwd)
+  ]);
+
+  // If this is tracked branch this is explicit...
+  let remote = gitConfig[`branch.${branch}.remote`];
+  if (remote) {
+    return gitConfig[`remote.${remote}.url`];
+  }
+
+  // Otherwise more like guess work...
+  let [remotes] = await run(
+    'git remote', { cwd, buffer: true, verbose: false }
+  );
+  let [remote] = remotes.trim().split('\n');
+  if (!remote) {
+    throw new Error(`Could not detect remote url for: : "${cwd}"`)
+  }
+  return gitConfig[`remote.${remote}.url`];
 }
 
 export async function branchName(config, cwd) {
