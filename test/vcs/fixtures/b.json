@@ -1,0 +1,15 @@
+[
+    {
+        "name": "fake-dalvik",
+        "path": "dalvik",
+        "revision": "master",
+        "remote": "git://github.com/mozilla-b2g/fake-dalvik"
+    },
+    {
+        "name": "gaia.git",
+        "path": "gaia",
+        "revision": "master",
+        "remote": "https://git.mozilla.org/releases/gaia.git"
+    }
+]
+

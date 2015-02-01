@@ -17,5 +17,11 @@ suite('vcs/repo', function() {
       let result = await vcsRepo.listManifestProjects(fixture('b2g', 'xml'));
       assert.deepEqual(require(fixture('b2g', 'json')), result);
     });
+
+    test('b.xml', async function() {
+      // Two files with includes...
+      let result = await vcsRepo.listManifestProjects(fixture('b', 'xml'));
+      assert.deepEqual(require(fixture('b', 'json')), result);
+    });
   });
 });

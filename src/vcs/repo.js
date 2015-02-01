@@ -91,6 +91,48 @@ export async function sync(config, cwd, opts={}) {
   await run(`./repo sync -j${opts.concurrency}`, { cwd });
 }
 
+export async function resolveManifestIncludes(path, manifest, seen) {
+  seen = seen || new Set();
+  if (!manifest.include) return manifest;
+  let dir = fsPath.dirname(path);
+
+  // Only descendants of this node share seen... Inclusions are allowed multiple
+  // times in the tree but nodes may not contain cyclic references.
+  seen = new Set(seen)
+  seen.add(path);
+
+  // Resolve includes...
+  await Promise.all(manifest.include.map(async function (v) {
+    let include = v['$'];
+
+    // Join and resolve the path to ensure we don't get tricked by relative
+    // directories when doing our circular checks...
+    let submanifestPath = fsPath.resolve(fsPath.join(dir, include.name));
+
+    if (seen.has(submanifestPath)) {
+      throw new Error(`Circular includes from: ${path} for ${include.name}`);
+    }
+
+    let submanifestContent = await fs.readFile(submanifestPath, 'utf8');
+    let { manifest: submanifest } = await parseXML(submanifestContent);
+
+    if (submanifest.include) {
+      submanifest =
+        await resolveManifestIncludes(submanifestPath, submanifest, seen);
+    }
+
+    if (submanifest.project) {
+      manifest.project = manifest.project.concat(submanifest.project);
+    }
+
+    if (submanifest.remote) {
+      manifest.remote = manifest.remote.concat(submanifest.remote);
+    }
+  }));
+
+  return manifest;
+}
+
 /**
 List the projects within a given repo manifest.
 
@@ -100,6 +142,7 @@ List the projects within a given repo manifest.
 export async function listManifestProjects(path) {
   let content = await fs.readFile(path, 'utf8');
   let { manifest } = await parseXML(content);
+  manifest = await resolveManifestIncludes(path, manifest);
 
   // For easier access create a dictionary of all the remotes...
   let remotes = manifest.remote.reduce((result, v) => {
