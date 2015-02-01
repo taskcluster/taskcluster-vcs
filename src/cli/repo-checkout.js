@@ -10,16 +10,11 @@ import denodeify from 'denodeify';
 import createHash from '../hash';
 import vcsRepo from '../vcs/repo';
 import _mkdirp from 'mkdirp';
+import * as clitools from '../clitools';
 
 let mkdirp = denodeify(_mkdirp);
 
-import { Index, Queue } from 'taskcluster-client';
-
 const STATS_FILE = '.tc-vcs-cache-stats.json';
-
-// Used in read only fashion so no need to wait to construct...
-let queue = new Queue();
-let index = new Index();
 
 async function useProjectCaches(config, target, namespace, branch, projects) {
   let start = Date.now();
@@ -70,7 +65,11 @@ async function getProjectCache(config, namespace, name) {
   let localPath = getCachePath(config, name);
   if (await fs.exists(localPath)) return localPath;
 
-  let remoteUrl = await checkRemoteProjectCache(config, namespace, name);
+  let remoteUrl = await clitools.lookupIndexArtifact(
+    `${namespace}.${createHash(name)}`,
+    `public/${name}.tar.gz`
+  );
+
   if (remoteUrl) {
     // Ensure directory exists...
     let dirname = fsPath.dirname(localPath);
@@ -90,31 +89,6 @@ function getCachePath(config, name) {
     root,
     render(config.repoCache.cacheName, { name })
   );
-}
-
-/**
-Determines if the clone has a cache if it does return a url do it.
-*/
-async function checkRemoteProjectCache(config, namespace, name) {
-  // normalize the url to the "name"
-  let namespace = `${namespace}.${createHash(name)}`;
-
-  let task;
-  try {
-    task = await index.findTask(namespace);
-  } catch (e) {
-    // 404 will throw so validate before returning null...
-    if (e.code && e.code != 404) throw e;
-    return null;
-  }
-
-  // Note that unlike some other caches we do not cache repo data locally (at
-  // least not yet...).
-  let url = queue.buildUrl(queue.getLatestArtifact,
-    task.taskId,
-    `public/${name}.tar.gz`
-  );
-  return url;
 }
 
 export default async function main(config, argv) {
