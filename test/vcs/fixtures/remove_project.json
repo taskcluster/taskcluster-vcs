@@ -1,0 +1,8 @@
+[
+    {
+        "name": "fake-dalvik",
+        "path": "dalvik",
+        "revision": "master",
+        "remote": "git://github.com/mozilla-b2g/fake-dalvik"
+    }
+]

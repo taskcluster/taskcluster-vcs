@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<manifest>
+  <remote name="b2g"
+           fetch="git://github.com/mozilla-b2g/" />
+  <include name="a.xml" />
+  <remove-project name="gaia.git" />
+  <project path="dalvik" name="fake-dalvik" remote="b2g" revision="master" />
+</manifest>
+
+

@@ -154,8 +154,10 @@ export async function sync(cwd, opts={}) {
   await run(cmd, { cwd });
 }
 
+
 export async function resolveManifestIncludes(path, manifest, seen) {
   seen = seen || new Set();
+
   if (!manifest.include) return manifest;
   let dir = fsPath.dirname(path);
 
@@ -191,6 +193,11 @@ export async function resolveManifestIncludes(path, manifest, seen) {
     if (submanifest.remote) {
       manifest.remote = (manifest.remote || []).concat(submanifest.remote);
     }
+
+    if (submanifest['remove-project']) {
+      manifest['remove-project'] =
+        (manifest['remove-project']|| []).concat(submanifest['remove-project']);
+    }
   }));
 
   return manifest;
@@ -224,11 +231,21 @@ export async function listManifestProjects(path) {
     }
   }
 
-  return manifest.project.map((v) => {
+  let removeList = new Set();
+  if (manifest['remove-project']) {
+    manifest['remove-project'].forEach((v) => {
+      removeList.add(v['$'].name);
+    });
+  }
+
+  return manifest.project.reduce((result, v) => {
     let project = v['$'];
     if (!project) throw new Error('unknown or empty project...');
     if (!project.name) throw new Error('Project must have a name...');
     if (!project.path) throw new Error('Project must have a path...');
+
+    // Disallow any names of projects in remove-project...
+    if (removeList.has(project.name)) return result;
 
     let remote = remotes[project.remote] || defaultRemote;
     if (!remote) {
@@ -239,13 +256,14 @@ export async function listManifestProjects(path) {
       throw new Error(`${project.name}'s remote has no fetch.`);
     }
 
-    return {
+    result.push({
       name: project.name,
       path: project.path,
       revision: project.revision || remote.revision || 'master',
       remote: urljoin(remote.fetch, project.name)
-    }
-  });
+    });
+    return result;
+  }, []);
 }
 
 /**

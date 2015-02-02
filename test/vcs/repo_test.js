@@ -42,6 +42,12 @@ suite('vcs/repo', function() {
       assert.deepEqual(require(fixture('b2g', 'json')), result);
     });
 
+    test('remove_project.xml', async function() {
+      // This file contains defaults and multiple remotes...
+      let result = await vcsRepo.listManifestProjects(fixture('remove_project', 'xml'));
+      assert.deepEqual(require(fixture('remove_project', 'json')), result);
+    });
+
     test('b.xml', async function() {
       // Two files with includes...
       let result = await vcsRepo.listManifestProjects(fixture('b', 'xml'));
