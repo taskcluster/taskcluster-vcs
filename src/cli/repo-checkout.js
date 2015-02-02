@@ -9,47 +9,6 @@ import Artifacts from '../artifacts';
 
 const STATS_FILE = '.tc-vcs-cache-stats.json';
 
-async function useProjectCaches(artifacts, target, namespace, branch, projects) {
-  let start = Date.now();
-  let stats = {
-    start: new Date(),
-    duration: null,
-    projects: {}
-  };
-
-  await Promise.all(projects.map(async (project) => {
-    let projectStart = Date.now();
-    let repoPath =
-      fsPath.join(target, '.repo', 'projects', `${project.path}.git`);
-
-    // Only attempt to use caches if the project does not exist... Tar will
-    // happy clobber things that likely should not be clobbered if expansion is
-    // triggered from the cache...
-    if (!await fs.exists(repoPath)) {
-      let name = `${urlAlias(project.remote)}/${branch}`;
-
-      await artifacts.useIfAvailable(
-        name,
-        `${namespace}.${createHash(name)}`,
-        target
-      );
-    }
-
-    await vcsRepo.sync(target, { project: project.name });
-
-    stats.projects[project.name] = {
-      duration: Date.now() - projectStart
-    };
-  }));
-
-  stats.duration = Date.now() - start;
-  stats.stop = new Date();
-  await fs.writeFile(
-    fsPath.join(target, '.repo', STATS_FILE),
-    JSON.stringify(stats, null, 2)
-  );
-}
-
 export default async function main(config, argv) {
   let parser = new ArgumentParser({
     prog: 'tc-vcs repo-checkout',
@@ -143,6 +102,11 @@ export default async function main(config, argv) {
   // Checkout the underlying repository before running repo...
   await checkout(config, checkoutArgs);
 
+  // Running repo sync in parallel is only safe for entirely new initializations
+  // when we can though this is up to 2x faster...
+  let canUseParallelSync =
+    !await fs.exists(fsPath.join(args.directory, '.repo'));
+
   // Initialize the directory with the repo command...
   await vcsRepo.init(args.directory, args.manifest, {
     branch: args.branch
@@ -152,8 +116,49 @@ export default async function main(config, argv) {
 
   // Determine the list of projects...
   let projects = await vcsRepo.list(args.directory);
-  await useProjectCaches(
-    artifacts, args.directory, args.namespace, args.branch, projects
+  let start = Date.now();
+  let stats = {
+    start: new Date(),
+    duration: null,
+    projects: {}
+  };
+
+  await Promise.all(projects.map(async (project) => {
+    let projectStart = Date.now();
+    let repoPath =
+      fsPath.join(args.directory, '.repo', 'projects', `${project.path}.git`);
+
+    // Only attempt to use caches if the project does not exist... Tar will
+    // happy clobber things that likely should not be clobbered if expansion is
+    // triggered from the cache...
+    if (!await fs.exists(repoPath)) {
+      let name = `${urlAlias(project.remote)}/${args.branch}`;
+
+      await artifacts.useIfAvailable(
+        name,
+        `${args.namespace}.${createHash(name)}`,
+        args.directory
+      );
+    }
+
+    if (canUseParallelSync) {
+      await vcsRepo.sync(args.directory, { project: project.name });
+    }
+
+    stats.projects[project.name] = {
+      duration: Date.now() - projectStart
+    };
+  }));
+
+  if (!canUseParallelSync) {
+    await vcsRepo.sync(args.directory);
+  }
+
+  stats.duration = Date.now() - start;
+  stats.stop = new Date();
+  await fs.writeFile(
+    fsPath.join(args.directory, '.repo', STATS_FILE),
+    JSON.stringify(stats, null, 2)
   );
 
   if (!await fs.exists(fsPath.join(args.directory, '.repo'))) {
