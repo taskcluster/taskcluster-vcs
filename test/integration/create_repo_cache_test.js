@@ -22,7 +22,7 @@ suite('create repo cache', function() {
     assert(fs.exists(`${this.home}/repo/sources/${source}.tar.gz`));
   });
 
-  test('multi-project cache', async function() {
+  test('@taskcluster multi-project cache', async function() {
     let projects = [
       'bitbucket.org/lightsofapollo/gittesting/master',
       'github.com/lightsofapollo/repo-gittesting/master'

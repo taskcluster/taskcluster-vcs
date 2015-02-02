@@ -1,6 +1,6 @@
 {
   "name": "taskcluster-vcs",
-  "version": "2.0.0-alpha.8",
+  "version": "2.0.0-alpha.10",
   "description": "Version control tools for taskcluster images",
   "main": "./build/bin/tc-vcs",
   "preferGlobal": true,
@@ -9,7 +9,8 @@
   },
   "scripts": {
     "prepublish": "6to5 -s -e src --out-dir build",
-    "test": "mocha $(find test -name '*_test.js')"
+    "test": "mocha $(find test -name '*_test.js')",
+    "test-no-upload": "mocha $(find test -name '*_test.js') --grep '@taskcluster' --invert"
   },
   "repository": {
     "type": "git",
@@ -28,6 +29,7 @@
     "deap": "^1.0.0",
     "denodeify": "^1.2.0",
     "event-to-promise": "^0.3.2",
+    "is-path-inside": "^1.0.0",
     "js-yaml": "^3.2.3",
     "json-templater": "^1.0.1",
     "mkdirp": "^0.5.0",

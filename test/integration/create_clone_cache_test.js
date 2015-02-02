@@ -27,7 +27,7 @@ suite('create clone cache', function() {
     assert(fs.exists(`${this.home}/clones/${alias}.tar.gz`));
   });
 
-  test('upload cache', async function() {
+  test('@taskcluster upload cache', async function() {
     let namespace = 'public.test.jlal.' + slugid.v4();
     let taskId = await createTask();
 
