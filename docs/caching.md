@@ -71,6 +71,13 @@ the url alias and hash with md5. The namespace is:
 tc-vcs.v1.clones.${md5('github.com/mozilla-b2g/gaia')}
 ```
 
+For repo individual projects are cached using the name of the project +
+branch (in this case the master branch).
+
+```
+tc-vcs.v1.repo-project.${md5('github/mozilla-b2g/gaia/master')}
+```
+
 ## User directory caching
 
 The `$HOME/.tc-vcs/` folder contains copies of the remote caches
