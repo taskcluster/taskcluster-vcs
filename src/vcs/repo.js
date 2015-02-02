@@ -14,10 +14,15 @@ import URL from 'url';
 import { parseString as _parseXML } from 'xml2js';
 import denodeify from 'denodeify';
 import urljoin from 'url-join';
+import isPathInside from 'is-path-inside';
+import mkdirp from 'mkdirp';
+import locatePath from '../pathing';
 
 let parseXML = denodeify(_parseXML);
+let mkdirp = denodeify(mkdirp);
 
 const TEMP_MANIFEST_NAME = '.tc-vcs-manifest';
+const MAX_MANIFEST_INCLUDES = 10;
 
 async function resolveManifestPath(cwd, path) {
   if (URL.parse(path).protocol) return path;
@@ -25,12 +30,72 @@ async function resolveManifestPath(cwd, path) {
   return fsPath.join(cwd, path);
 }
 
+async function loadManifest(path) {
+  if (await fs.exists(path)) {
+    // If the manifest exists on the local system...
+    return await fs.readFile(path, 'utf8');
+  } else {
+    // Otherwise try over http...
+    let res = await request.get(path).buffer(true).end();
+    if (res.error) throw res.error;
+    return res.text;
+  }
+}
+
+async function loadManifestIncludes(target, root, base, path, seen) {
+  seen = seen || new Set();
+
+  let location = locatePath(root, base, path);
+
+  seen = new Set(seen);
+  seen.add(location.absolute);
+
+  let writePath = fsPath.join(target, location.relative);
+  let manifestContent = await loadManifest(location.absolute);
+  await mkdirp(fsPath.dirname(writePath));
+  await fs.writeFile(writePath, manifestContent);
+
+  let { manifest } = await parseXML(manifestContent);
+  if (!manifest.include) return;
+
+  await Promise.all(manifest.include.map(async (v) => {
+    let name = v['$'].name;
+    let location = locatePath(root, base, name);
+    if (seen.has(location.absolute)) {
+      throw new Error(`Cyclic reference in includes (${root}) from ${path} to ${name}`);
+    }
+    await loadManifestIncludes(
+      target,
+      root,
+      fsPath.dirname(location.relative),
+      fsPath.basename(location.relative),
+      seen
+    );
+  }));
+}
+
+/**
+Checkout given manifest and resolve includes...
+*/
+async function checkoutManifest(root, path, rootManifest) {
+  let manifestName = fsPath.basename(path);
+  // Only descendants of this node share seen... Inclusions are allowed multiple
+  // times in the tree but nodes may not contain cyclic references.
+  await loadManifestIncludes(
+    root,
+    fsPath.dirname(path),
+    '',
+    manifestName
+  );
+  return manifestName;
+}
+
 /**
 Initialize the "repo" using a custom manifest...
 
 This logic is mostly taken from what the config.sh command does inside of b2g.
 */
-export async function init(config, cwd, manifest, opts={}) {
+export async function init(cwd, manifest, opts={}) {
   opts = Object.assign({ branch: 'master' }, opts);
   manifest = await resolveManifestPath(cwd, manifest);
 
@@ -46,33 +111,19 @@ export async function init(config, cwd, manifest, opts={}) {
     await run(`rm -Rf ${manifestRepo}`);
   }
 
+  let manifestPathName = await checkoutManifest(manifestRepo, manifest);
+
   // Commit the manifest to the temp repo ... The repo command expects the
   // manifest to be inside of a git repository so we must place it there then
   // pass the local repository for the repo command to do it's thing.
   await run(`git init ${manifestRepo}`);
-
-  let manifestContent;
-  if (await fs.exists(manifest)) {
-    // If the manifest exists on the local system...
-    manifestContent = await fs.readFile(manifest, 'utf8');
-  } else {
-    // Otherwise try over http...
-    let res = await request.get(manifest).buffer(true).end();
-    if (res.error) throw res.error;
-    manifestContent = res.text;
-  }
-
-  // Do the git commit dance...
-  await fs.writeFile(
-    fsPath.join(manifestRepo, 'manifest.xml'), manifestContent
-  );
-  await run('git add manifest.xml', { cwd: manifestRepo });
+  await run('git add --all', { cwd: manifestRepo });
   await run('git commit -m manifest', { cwd: manifestRepo });
   await run(`git branch -m ${opts.branch}`, { cwd: manifestRepo });
 
   // Initialize the manifests...
   await run(
-    `./repo init -b ${opts.branch} -u ${manifestRepo} -m manifest.xml`, 
+    `./repo init -b ${opts.branch} -u ${manifestRepo} -m ${manifestPathName}`,
     { cwd }
   );
 
@@ -86,7 +137,7 @@ export async function init(config, cwd, manifest, opts={}) {
   }));
 }
 
-export async function sync(config, cwd, opts={}) {
+export async function sync(cwd, opts={}) {
   opts = Object.assign({
     concurrency: 100,
     project: null
@@ -134,11 +185,11 @@ export async function resolveManifestIncludes(path, manifest, seen) {
     }
 
     if (submanifest.project) {
-      manifest.project = manifest.project.concat(submanifest.project);
+      manifest.project = (manifest.project || []).concat(submanifest.project);
     }
 
     if (submanifest.remote) {
-      manifest.remote = manifest.remote.concat(submanifest.remote);
+      manifest.remote = (manifest.remote || []).concat(submanifest.remote);
     }
   }));
 
@@ -148,7 +199,6 @@ export async function resolveManifestIncludes(path, manifest, seen) {
 /**
 List the projects within a given repo manifest.
 
-@param {Object} config for manifest.
 @param {String} path to manifest.xml on disk.
 */
 export async function listManifestProjects(path) {
@@ -201,8 +251,11 @@ export async function listManifestProjects(path) {
 /**
 Generate list of all projects with path / name and remote.
 */
-export async function list(config, cwd, opts={}) {
-  let manifestPath = fsPath.join(cwd, '.repo', 'manifest.xml');
+export async function list(cwd, opts={}) {
+  let orig = fsPath.join(cwd, '.repo', 'manifest.xml');
+  let manifestPath =
+    await fs.realpath(fsPath.join(cwd, '.repo', 'manifest.xml'), {});
+
   if (!manifestPath) {
     throw new Error(`Cannot list projects without manifest ${manifestPath}`);
   }

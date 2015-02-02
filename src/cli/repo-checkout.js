@@ -1,27 +1,15 @@
 import { ArgumentParser, RawDescriptionHelpFormatter } from 'argparse';
 import checkout from './checkout';
-import run from '../vcs/run';
-import render from 'json-templater/string';
 import fs from 'mz/fs';
 import fsPath from 'path';
-import temp from 'promised-temp';
 import urlAlias from '../vcs/url_alias';
-import denodeify from 'denodeify';
 import createHash from '../hash';
 import vcsRepo from '../vcs/repo';
-import _mkdirp from 'mkdirp';
-
-let mkdirp = denodeify(_mkdirp);
-
-import { Index, Queue } from 'taskcluster-client';
+import Artifacts from '../artifacts';
 
 const STATS_FILE = '.tc-vcs-cache-stats.json';
 
-// Used in read only fashion so no need to wait to construct...
-let queue = new Queue();
-let index = new Index();
-
-async function useProjectCaches(config, target, namespace, branch, projects) {
+async function useProjectCaches(artifacts, target, namespace, branch, projects) {
   let start = Date.now();
   let stats = {
     start: new Date(),
@@ -31,19 +19,23 @@ async function useProjectCaches(config, target, namespace, branch, projects) {
 
   await Promise.all(projects.map(async (project) => {
     let projectStart = Date.now();
-    let name = `${urlAlias(project.remote)}/${branch}`;
-    let cachePath = await getProjectCache(config, namespace, name);
+    let repoPath =
+      fsPath.join(target, '.repo', 'projects', `${project.path}.git`);
 
-    if (cachePath) {
-      await run(render(config.repoCache.extract, {
-        source: cachePath,
-        dest: target
-      }));
+    // Only attempt to use caches if the project does not exist... Tar will
+    // happy clobber things that likely should not be clobbered if expansion is
+    // triggered from the cache...
+    if (!await fs.exists(repoPath)) {
+      let name = `${urlAlias(project.remote)}/${branch}`;
+
+      await artifacts.useIfAvailable(
+        name,
+        `${namespace}.${createHash(name)}`,
+        target
+      );
     }
 
-    await vcsRepo.sync(config, target, {
-      project: project.name
-    });
+    await vcsRepo.sync(target, { project: project.name });
 
     stats.projects[project.name] = {
       duration: Date.now() - projectStart
@@ -56,57 +48,6 @@ async function useProjectCaches(config, target, namespace, branch, projects) {
     fsPath.join(target, '.repo', STATS_FILE),
     JSON.stringify(stats, null, 2)
   );
-}
-
-async function getProjectCache(config, namespace, name) {
-  let localPath = getCachePath(config, name);
-  if (await fs.exists(localPath)) return localPath;
-
-  let remoteUrl = await checkRemoteProjectCache(config, namespace, name);
-  if (remoteUrl) {
-    // Ensure directory exists...
-    let dirname = fsPath.dirname(localPath);
-    await mkdirp(dirname);
-    await run(render(config.repoCache.get, {
-      url: remoteUrl,
-      dest: localPath
-    }));
-    return localPath;
-  }
-  return null;
-}
-
-function getCachePath(config, name) {
-  let root = render(config.repoCache.cacheDir, { env: process.env });
-  return fsPath.join(
-    root,
-    render(config.repoCache.cacheName, { name })
-  );
-}
-
-/**
-Determines if the clone has a cache if it does return a url do it.
-*/
-async function checkRemoteProjectCache(config, namespace, name) {
-  // normalize the url to the "name"
-  let namespace = `${namespace}.${createHash(name)}`;
-
-  let task;
-  try {
-    task = await index.findTask(namespace);
-  } catch (e) {
-    // 404 will throw so validate before returning null...
-    if (e.code && e.code != 404) throw e;
-    return null;
-  }
-
-  // Note that unlike some other caches we do not cache repo data locally (at
-  // least not yet...).
-  let url = queue.buildUrl(queue.getLatestArtifact,
-    task.taskId,
-    `public/${name}.tar.gz`
-  );
-  return url;
 }
 
 export default async function main(config, argv) {
@@ -142,14 +83,6 @@ export default async function main(config, argv) {
     help: 'branch argument to pass (-b) to repo init'
   });
 
-  parser.addArgument(['-m', '--manifest'], {
-    required: true,
-    dest: 'manifest',
-    help: `
-      Manifest xml file to use to initialize repo.
-    `
-  });
-
   parser.addArgument(['directory'], {
     type: (value) => {
       return fsPath.resolve(value);
@@ -159,6 +92,12 @@ export default async function main(config, argv) {
 
   parser.addArgument(['baseUrl'], {
     help: 'Base repository to clone',
+  });
+
+  parser.addArgument(['manifest'], {
+    help: `
+      Manifest path or url used to initialize repo.
+    `
   });
 
   parser.addArgument(['headUrl'], {
@@ -205,14 +144,16 @@ export default async function main(config, argv) {
   await checkout(config, checkoutArgs);
 
   // Initialize the directory with the repo command...
-  await vcsRepo.init(config, args.directory, args.manifest, {
+  await vcsRepo.init(args.directory, args.manifest, {
     branch: args.branch
   });
 
+  let artifacts = new Artifacts(config.repoCache);
+
   // Determine the list of projects...
-  let projects = await vcsRepo.list(config, args.directory);
+  let projects = await vcsRepo.list(args.directory);
   await useProjectCaches(
-    config, args.directory, args.namespace, args.branch, projects
+    artifacts, args.directory, args.namespace, args.branch, projects
   );
 
   if (!await fs.exists(fsPath.join(args.directory, '.repo'))) {

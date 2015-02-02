@@ -3,19 +3,10 @@ import run from './run';
 import fs from 'mz/fs';
 import assert from 'assert';
 import mkdirp from 'mkdirp';
-import cloneCache from './clone_cache';
 
 suite('clone', function() {
-  async function clean() {
-    await rm('./clones/');
-    mkdirp.sync(__dirname + '/clones');
-  }
-
-  teardown(clean);
-  setup(clean);
-
   test('hg', async function() {
-    let dest = __dirname + '/clones/hg';
+    let dest = `${this.home}/clones/hg`;
     let out = await run([
       'clone',
       'https://bitbucket.org/lightsofapollo/hgtesting',
@@ -27,7 +18,7 @@ suite('clone', function() {
   });
 
   test('git', async function () {
-    let dest = __dirname + '/clones/git';
+    let dest = `${this.home}/clones/git`;
     await run([
       'clone',
       'https://bitbucket.org/lightsofapollo/gittesting',
@@ -39,27 +30,26 @@ suite('clone', function() {
   });
 
   test('cached', async function () {
-    let url = 'https://github.com/lightsofapollo/tc-vcs-cache';
-    let [namespace] = await cloneCache(url);
+    let home = this.home;
+    let alias = 'github.com/lightsofapollo/tc-vcs-cache';
+    let url = `https://${alias}`;
+    await run(['create-clone-cache', url]);
     async function testCache (dest) {
       await run([
         'clone',
-        '--namespace', namespace,
         url,
         dest
       ]);
 
       assert((await fs.exists(dest)), 'path exists');
       let rev = await run(['revision', dest]);
-      let cachePath = __dirname + '/../cache/' +
-                      'clones/github.com/lightsofapollo/tc-vcs-cache.tar.gz';
-
+      let cachePath = `${home}/clones/${alias}.tar.gz`;
       assert.ok((await fs.exists(cachePath)), 'cache was correctly downloaded');
     }
 
     // Run and rerun the cache a few times to see what happens!
-    await testCache(__dirname + '/clones/cache-1');
-    await testCache(__dirname + '/clones/cache-2');
-    await testCache(__dirname + '/clones/cache-3');
+    await testCache(`${home}/clones/cache-1`);
+    await testCache(`${home}/clones/cache-2`);
+    await testCache(`${home}/clones/cache-3`);
   });
 });
