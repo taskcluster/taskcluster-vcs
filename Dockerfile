@@ -1,4 +1,4 @@
 FROM node:latest
-RUN npm install -g taskcluster-vcs --no-optional
-COPY task.sh /entrypoint.sh
-ENTRYPOINT ["/entrypoint.sh"]
+RUN npm install -g taskcluster-vcs@2.0.0-alpha.14 --no-optional
+ENTRYPOINT ["tc-vcs"]
+
