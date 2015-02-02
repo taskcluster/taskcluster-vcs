@@ -252,7 +252,10 @@ export async function listManifestProjects(path) {
 Generate list of all projects with path / name and remote.
 */
 export async function list(cwd, opts={}) {
-  let manifestPath = fsPath.join(cwd, '.repo', 'manifest.xml');
+  let orig = fsPath.join(cwd, '.repo', 'manifest.xml');
+  let manifestPath =
+    await fs.realpath(fsPath.join(cwd, '.repo', 'manifest.xml'), {});
+
   if (!manifestPath) {
     throw new Error(`Cannot list projects without manifest ${manifestPath}`);
   }
