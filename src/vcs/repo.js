@@ -185,11 +185,11 @@ export async function resolveManifestIncludes(path, manifest, seen) {
     }
 
     if (submanifest.project) {
-      manifest.project = manifest.project.concat(submanifest.project);
+      manifest.project = (manifest.project || []).concat(submanifest.project);
     }
 
     if (submanifest.remote) {
-      manifest.remote = manifest.remote.concat(submanifest.remote);
+      manifest.remote = (manifest.remote || []).concat(submanifest.remote);
     }
   }));
 
