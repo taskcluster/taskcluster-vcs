@@ -6,9 +6,10 @@ import mkdirp from 'mkdirp';
 
 suite('clone', function() {
   test('hg', async function() {
-    let dest = `${this.home}/clones/hg`;
+    let dest = `${this.home}/hg`;
     let out = await run([
       'clone',
+      '--namespace=not-vcs-test',
       'https://bitbucket.org/lightsofapollo/hgtesting',
       dest
     ]);
@@ -18,9 +19,10 @@ suite('clone', function() {
   });
 
   test('git', async function () {
-    let dest = `${this.home}/clones/git`;
+    let dest = `${this.home}/git`;
     await run([
       'clone',
+      '--namespace=not-vcs-test',
       'https://bitbucket.org/lightsofapollo/gittesting',
       dest
     ]);
@@ -48,8 +50,8 @@ suite('clone', function() {
     }
 
     // Run and rerun the cache a few times to see what happens!
-    await testCache(`${home}/clones/cache-1`);
-    await testCache(`${home}/clones/cache-2`);
-    await testCache(`${home}/clones/cache-3`);
+    await testCache(`${home}/cache-1`);
+    await testCache(`${home}/cache-2`);
+    await testCache(`${home}/cache-3`);
   });
 });

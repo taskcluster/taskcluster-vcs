@@ -25,7 +25,7 @@ Shorthand for getting at taskcluster index client with proxy optionally enabled.
 */
 export function getTcIndex(proxy=false) {
   let options = {};
-  if (proxy) options.baseUrl = 'taskcluster/index /v1';
+  if (proxy) options.baseUrl = 'taskcluster/index/v1';
   return new Index(options);
 }
 
