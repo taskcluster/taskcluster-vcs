@@ -40,8 +40,9 @@ export default async function main(config, argv) {
   let artifacts = new Artifacts(config.cloneCache);
 
   let usedCache = await artifacts.useIfAvailable(
+    alias,
     namespace,
-    alias
+    args.dest
   );
 
   // If we did not have the chance to utilize a cache clone the long way...

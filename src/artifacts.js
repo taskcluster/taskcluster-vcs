@@ -82,6 +82,7 @@ export default class Artifacts {
 
     await this.download(remoteUrl, localPath);
     await this.extract(localPath, dest);
+    return true;
   }
 
   /**
@@ -108,6 +109,7 @@ export default class Artifacts {
   Extract the tars!
   */
   async extract(source, dest) {
+    await mkdirp(dest);
     assert(await fs.exists(source), `${source} must exist to extract...`);
     assert(dest, 'must pass dest...');
     await run(render(this.config.extract, {
