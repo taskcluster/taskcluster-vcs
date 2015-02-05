@@ -80,8 +80,18 @@ export default class Artifacts {
       return false;
     }
 
-    await this.download(remoteUrl, localPath);
-    await this.extract(localPath, dest);
+    try {
+      await this.download(remoteUrl, localPath);
+      await this.extract(localPath, dest);
+    } catch (e) {
+      console.error(
+        'Error downloading or extracting cache continuing without',
+        remoteUrl,
+        e.stack
+      );
+      return false;
+    }
+
     return true;
   }
 
