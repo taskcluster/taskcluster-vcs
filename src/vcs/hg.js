@@ -1,4 +1,4 @@
-import run from './run';
+import run from '../run';
 
 export async function clone(config, source, dest) {
   return await run(`${config.hg} clone ${source} ${dest}`);

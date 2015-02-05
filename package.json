@@ -23,7 +23,7 @@
   },
   "homepage": "https://github.com/lightsofapollo/taskcluster-vcs",
   "dependencies": {
-    "6to5": "^2.13.7",
+    "6to5": "^3.3.12",
     "argparse": "^0.1.15",
     "bluebird": "^2.9.1",
     "deap": "^1.0.0",

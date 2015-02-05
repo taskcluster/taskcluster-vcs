@@ -1,6 +1,6 @@
-import { parseString as _parseString } from 'xml2js';
+import _parseString from 'xml2js';
 import fs from 'mz/fs';
-import vcsRepo from '../../src/vcs/repo';
+import * as vcsRepo from '../../src/vcs/repo';
 import denodeify from 'denodeify';
 import assert from 'assert';
 import run from '../integration/run'

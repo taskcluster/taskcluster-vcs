@@ -4,7 +4,7 @@ import fs from 'mz/fs';
 import fsPath from 'path';
 import urlAlias from '../vcs/url_alias';
 import createHash from '../hash';
-import vcsRepo from '../vcs/repo';
+import * as vcsRepo from '../vcs/repo';
 import Artifacts from '../artifacts';
 
 const STATS_FILE = '.tc-vcs-cache-stats.json';
