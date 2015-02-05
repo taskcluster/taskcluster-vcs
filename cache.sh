@@ -1,4 +1,4 @@
-#! /bin/bash -vex
+#! /bin/bash -e
 
 run_clone () {
   node task.js create-clone-cache --upload --proxy $1 | taskcluster run-task &
@@ -12,6 +12,7 @@ emulator_url () {
   echo "http://hg.mozilla.org/mozilla-central/raw-file/default/b2g/config/$1/sources.xml"
 }
 
+run_clone https://github.com/lightsofapollo/build-mozharness
 run_clone https://hg.mozilla.org/build/mozharness
 run_clone https://hg.mozilla.org/build/tools
 run_clone https://hg.mozilla.org/mozilla-central
