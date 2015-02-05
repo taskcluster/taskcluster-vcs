@@ -12,7 +12,7 @@ repoCache:
   uploadTar: "curl --header 'Content-Type: application/x-tar' --header 'Content-Encoding: gzip' -X PUT --data-binary @'{{source}}' '{{url}}'"
   # Large http get requests are often slower using nodes built in http layer so
   # we utilize a subprocess which is responsible for fetching...
-  get: curl -L 5 -o {{dest}} {{url}}
+  get: curl -L -o {{dest}} {{url}}
   # Used to create clone tarball
   compress: tar -czf {{dest}} {{source}}
   # All cache urls use tar + gz this is the command used to extract those files
