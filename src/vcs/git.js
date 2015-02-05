@@ -1,4 +1,4 @@
-import run from './run';
+import run from '../run';
 
 export async function clone(config, source, dest) {
   return await run(`${config.git} clone ${source} ${dest}`);
@@ -49,9 +49,9 @@ export async function remoteUrl(config, cwd) {
   ]);
 
   // If this is tracked branch this is explicit...
-  let remote = gitConfig[`branch.${branch}.remote`];
-  if (remote) {
-    return gitConfig[`remote.${remote}.url`];
+  let trackingRemote = gitConfig[`branch.${branch}.remote`];
+  if (trackingRemote) {
+    return gitConfig[`remote.${trackingRemote}.url`];
   }
 
   // Otherwise more like guess work...

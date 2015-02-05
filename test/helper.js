@@ -1,5 +1,5 @@
 import temp from 'promised-temp';
-import run from '../src/vcs/run';
+import run from '../src/run';
 
 let home = temp.path();
 

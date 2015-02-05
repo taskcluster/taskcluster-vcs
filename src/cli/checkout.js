@@ -1,6 +1,6 @@
 import { ArgumentParser, RawDescriptionHelpFormatter } from 'argparse';
 import detectLocal from '../vcs/detect_local';
-import run from '../vcs/run';
+import run from '../run';
 import _mkdirp from 'mkdirp';
 import fs from 'mz/fs';
 import fsPath from 'path';

@@ -30,7 +30,6 @@ function loadConfig(userConfig) {
     defaults = deap(defaults, globalConfig);
   }
 
-  console.log(JSON.stringify(defaults));
   if (!userConfig) {
     return defaults;
   }

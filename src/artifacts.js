@@ -1,4 +1,4 @@
-import run from './vcs/run';
+import run from './run';
 import render from 'json-templater/string';
 import fs from 'mz/fs';
 import fsPath from 'path';
@@ -92,17 +92,19 @@ export default class Artifacts {
     // Ensure directory exists...
     let dirname = fsPath.dirname(localPath);
     await mkdirp(dirname);
-    await run(render(this.config.get, {
+    let cmd = render(this.config.get, {
       url: remoteUrl,
       dest: localPath
-    }));
+    });
+    await run(cmd, { retries: 20 });
   }
 
   async upload(source, url) {
     assert(await fs.exists(source), `${source} must exist`);
-    await run(render(this.config.uploadTar, {
+    let cmd = render(this.config.uploadTar, {
       source, url
-    }));
+    });
+    await run(cmd, { retries: 10 });
   }
 
   /**

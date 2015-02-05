@@ -3,6 +3,9 @@ import util from 'util';
 import eventToPromise from 'event-to-promise';
 import fs from 'fs';
 
+const DEFAULT_RETRIES = 10;
+const RETRY_SLEEP = 1000;
+
 /**
 Wrapper around process spawning with extra logging.
 
@@ -10,21 +13,23 @@ Wrapper around process spawning with extra logging.
 @param {Object} opts usual options for spawn.
 @param {Boolean} opts.buffer buffer output and return [stdout, stderr].
 */
-export default async function run(command, opts = {}) {
+export default async function run(command, config = {}, _try=0) {
   if (Array.isArray(command)) {
     command = command.join(' ');
   }
 
-  opts = Object.assign({
+  let opts = Object.assign({
     stdio: 'pipe',
     buffer: false,
-    env: process.env,
-    verbose: true
-  }, opts)
+    verbose: true,
+    retries: 0
+  }, config);
 
   let cwd = opts.cwd || process.cwd();
   var start = Date.now();
-  if (opts.verbose) console.log(`[tc-vcs] run start : (cwd: ${cwd}) ${command}`);
+  if (opts.verbose) {
+    console.log(`[tc-vcs] ${_try} run start : (cwd: ${cwd}) ${command}`);
+  }
   var proc = spawn('/bin/bash', ['-c'].concat(command), opts);
   let stdout = '';
   let stderr = '';
@@ -54,7 +59,26 @@ export default async function run(command, opts = {}) {
   }
 
   if (proc.exitCode != 0) {
-    throw new Error(`Error running command: ${command}`);
+    if (_try < opts.retries) {
+      console.error(
+        '[tc-vcs] run end (with error) try (%d/%d) retrying in %d ms : %s',
+        _try,
+        opts.retries,
+        RETRY_SLEEP,
+        command
+      );
+
+      // Sleep for a bit..
+      await new Promise(accept => setTimeout(accept, _try * RETRY_SLEEP));
+      let retryOpts = Object.assign({}, opts);
+
+      // Issue the retry...
+      return await run(command, retryOpts, _try + 1);
+    }
+
+    let err = Error(`Error running command: ${command}`);
+    err.retired = _try;
+    throw err;
   }
 
   return [stdout, stderr];

@@ -3,7 +3,7 @@ import checkout from './checkout';
 import fsPath from 'path';
 import urlAlias from '../vcs/url_alias';
 import createHash from '../hash';
-import run from '../vcs/run';
+import run from '../run';
 import temp from 'promised-temp';
 import Artifacts from '../artifacts';
 

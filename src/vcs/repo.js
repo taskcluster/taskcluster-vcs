@@ -6,7 +6,7 @@ used to refer explicitly to this tool.
 
 import assert from 'assert';
 import fsPath from 'path';
-import run from './run';
+import run from '../run';
 import request from 'superagent-promise';
 import fs from 'mz/fs';
 import git from './git';
@@ -15,11 +15,11 @@ import { parseString as _parseXML } from 'xml2js';
 import denodeify from 'denodeify';
 import urljoin from 'url-join';
 import isPathInside from 'is-path-inside';
-import mkdirp from 'mkdirp';
+import mkdirp_ from 'mkdirp';
 import locatePath from '../pathing';
 
 let parseXML = denodeify(_parseXML);
-let mkdirp = denodeify(mkdirp);
+let mkdirp = denodeify(mkdirp_);
 
 const TEMP_MANIFEST_NAME = '.tc-vcs-manifest';
 const MAX_MANIFEST_INCLUDES = 10;

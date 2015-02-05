@@ -1,11 +1,11 @@
 import { ArgumentParser } from 'argparse';
 import repoCheckout from './repo-checkout';
-import vcsRepo from '../vcs/repo';
+import * as vcsRepo from '../vcs/repo';
 import temp from 'promised-temp';
 import fsPath from 'path';
 import urlAlias from '../vcs/url_alias';
 import createHash from '../hash';
-import run from '../vcs/run';
+import run from '../run';
 import Artifacts from '../artifacts';
 
 import * as clitools from '../clitools';
