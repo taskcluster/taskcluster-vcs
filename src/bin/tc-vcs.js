@@ -9,6 +9,7 @@ import fsPath from 'path';
 import yaml from 'js-yaml';
 import deap from 'deap';
 
+const GLOBAL_CONFIG = '/etc/taskcluster-vcs.yml';
 const ACTION_DIR = fsPath.join(__dirname, '..', 'cli');
 const ACTIONS = fs.readdirSync(ACTION_DIR).reduce((initial, cli) => {
   initial[cli.replace('.js', '')] = fsPath.join(ACTION_DIR, cli);
@@ -16,13 +17,26 @@ const ACTIONS = fs.readdirSync(ACTION_DIR).reduce((initial, cli) => {
 }, {});
 
 function loadConfig(userConfig) {
+  // Load defaults these always exist...
   let defaults = yaml.safeLoad(fs.readFileSync(
     __dirname + '/../../default_config.yml', 'utf8'
   ));
 
+  // Machine global configs which override in tree defaults.
+  if (fs.existsSync(GLOBAL_CONFIG)) {
+    let globalConfig = yaml.safeLoad(fs.readFileSync(
+      GLOBAL_CONFIG, 'utf8'
+    ));
+    defaults = deap(defaults, globalConfig);
+  }
+
+  console.log(JSON.stringify(defaults));
   if (!userConfig) {
     return defaults;
   }
+
+
+  // User configs which override everything...
   return deap(defaults, userConfig);
 }
 
