@@ -3,3 +3,4 @@ theme: readthedocs
 pages:
   - ['index.md', 'Home']
   - ['caching.md', 'Caching strategies']
+  - ['config.md', 'Configuration']
