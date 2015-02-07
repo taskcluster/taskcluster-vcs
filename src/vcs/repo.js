@@ -151,7 +151,7 @@ export async function sync(cwd, opts={}) {
 
   let cmd = `./repo sync -j${opts.concurrency}`;
   if (opts.project) cmd += ` ${opts.project}`;
-  await run(cmd, { cwd });
+  await run(cmd, { cwd, retries: 20 });
 }
 
 

@@ -1,7 +1,9 @@
 import run from '../run';
 
 export async function clone(config, source, dest) {
-  return await run(`${config.hg} clone ${source} ${dest}`);
+  return await run(`${config.hg} clone ${source} ${dest}`, {
+    retries: 20
+  });
 }
 
 export async function revision(config, cwd) {
@@ -15,7 +17,10 @@ export async function revision(config, cwd) {
 }
 
 export async function checkoutRevision(config, cwd, repository, ref, revision) {
-  await run(`${config.hg} pull -r ${revision} ${repository}`, { cwd });
+  await run(`${config.hg} pull -r ${revision} ${repository}`, { 
+    cwd,
+    retries: 20
+  });
   await run(`${config.hg} update -C ${revision}`, { cwd });
 }
 
