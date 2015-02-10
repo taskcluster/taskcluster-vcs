@@ -1,5 +1,6 @@
 import { ArgumentParser, RawDescriptionHelpFormatter } from 'argparse';
 import detectLocal from '../vcs/detect_local';
+import detectRemote from '../vcs/detect_remote';
 import run from '../run';
 import _mkdirp from 'mkdirp';
 import fs from 'mz/fs';
@@ -84,12 +85,14 @@ export default async function main(config, argv) {
   });
 
   let args = parser.parseArgs(argv);
+  let remoteVcsConfig = await detectRemote(args.baseUrl);
 
   // First check if the directory exists if it does it must be a detectable vcs
   // type...
   if (await fs.exists(args.directory)) {
+    let vcsConfig;
     try {
-      let vcsConfig = await detectLocal(args.directory);
+      vcsConfig = await detectLocal(args.directory);
     } catch (err) {
       console.error(
         `
@@ -98,6 +101,13 @@ export default async function main(config, argv) {
         `
       );
       process.exit(1);
+    }
+    if (vcsConfig.type != remoteVcsConfig.type) {
+      console.warn(
+        '[tc-vcs] Local cache is not same vcs type as remote purging...'
+      );
+      await run(`rm -Rf ${args.directory}`);
+      await clone(config, [args.baseUrl, args.directory]);
     }
   } else {
     await clone(config, [args.baseUrl, args.directory]);
