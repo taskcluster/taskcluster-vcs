@@ -109,7 +109,9 @@ export default async function main(config, argv) {
 
   // Initialize the directory with the repo command...
   await vcsRepo.init(args.directory, args.manifest, {
-    branch: args.branch
+    branch: args.branch,
+    repoUrl: config.repoCache.repoUrl,
+    repoRevision: config.repoCache.repoRevision
   });
 
   let artifacts = new Artifacts(config.repoCache);

@@ -96,7 +96,11 @@ Initialize the "repo" using a custom manifest...
 This logic is mostly taken from what the config.sh command does inside of b2g.
 */
 export async function init(cwd, manifest, opts={}) {
-  opts = Object.assign({ branch: 'master' }, opts);
+  opts = Object.assign({
+    branch: 'master',
+    repoUrl: 'https://gerrit.googlesource.com/git-repo',
+    repoRevision: 'master'
+  }, opts);
   manifest = await resolveManifestPath(cwd, manifest);
 
   assert(await fs.exists(cwd), 'Must be run on an existing directory');
@@ -122,10 +126,16 @@ export async function init(cwd, manifest, opts={}) {
   await run(`git branch -m ${opts.branch}`, { cwd: manifestRepo });
 
   // Initialize the manifests...
-  await run(
-    `./repo init -b ${opts.branch} -u ${manifestRepo} -m ${manifestPathName}`,
-    { cwd }
-  );
+  await run([
+    './repo init',
+    '-b', opts.branch,
+    '-u', manifestRepo,
+    '-m', manifestPathName,
+    '--repo-url', opts.repoUrl,
+    '--repo-branch', opts.repoRevision
+  ].join(' '), {
+    cwd
+  });
 
   // XXX: This is an interesting hack to work around the fact that if these
   // files are present ./repo sync will attempt to copy/write to them which
