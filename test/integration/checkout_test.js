@@ -26,6 +26,22 @@ suite('checkout', function() {
     throw new Error('should have thrown an error');
   });
 
+  test('checkout git then hg...', async function() {
+    let dest = `${this.home}/clones/tc-vcs-cache`;
+    await run([
+      'checkout',
+      dest,
+      'https://github.com/lightsofapollo/tc-vcs-cache'
+    ]);
+    await run([
+      'checkout',
+      dest,
+      'https://bitbucket.org/lightsofapollo/hgtesting',
+    ]);
+    let rev = await run(['revision', dest]);
+    assert.equal(rev[0], '5d3acb7ef08f1c988b6f34ade72718a10a6ac123');
+  });
+
   test('checkout fresh then checkout again', async function () {
     let url = 'https://github.com/lightsofapollo/tc-vcs-cache';
     let dest = `${this.home}/clones/tc-vcs-cache`;
