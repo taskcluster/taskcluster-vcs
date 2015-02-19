@@ -1,5 +1,7 @@
 import { ArgumentParser } from 'argparse';
 import detectLocal from '../vcs/detect_local'
+import fs from 'mz/fs';
+var path = require('path');
 
 export default async function main(config, argv) {
   let parser = new ArgumentParser({
@@ -28,7 +30,11 @@ export default async function main(config, argv) {
   let args = parser.parseArgs(argv);
   let vcsConfig = await detectLocal(args.path);
   let vcs = require('../vcs/' + vcsConfig.type);
+  let repository = args.repository;
+  if (fs.existsSync(repository)) {
+    repository = path.resolve(repository);
+  }
   await vcs.checkoutRevision(
-    config, args.path, args.repository, args.ref, args.revision
+    config, args.path, repository, args.ref, args.revision
   );
 }
