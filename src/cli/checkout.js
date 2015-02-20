@@ -1,6 +1,6 @@
 import { ArgumentParser, RawDescriptionHelpFormatter } from 'argparse';
 import detectLocal from '../vcs/detect_local';
-import detectRemote from '../vcs/detect_remote';
+import detect from '../vcs/detect';
 import run from '../run';
 import _mkdirp from 'mkdirp';
 import fs from 'mz/fs';
@@ -85,7 +85,7 @@ export default async function main(config, argv) {
   });
 
   let args = parser.parseArgs(argv);
-  let remoteVcsConfig = await detectRemote(args.baseUrl);
+  let remoteVcsConfig = await detect(args.baseUrl);
 
   // First check if the directory exists if it does it must be a detectable vcs
   // type...
