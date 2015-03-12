@@ -22,6 +22,7 @@ export default async function run(command, config = {}, _try=0) {
     stdio: 'pipe',
     buffer: false,
     verbose: true,
+    raiseError: true,
     retries: 0
   }, config);
 
@@ -76,9 +77,11 @@ export default async function run(command, config = {}, _try=0) {
       return await run(command, retryOpts, _try + 1);
     }
 
-    let err = Error(`Error running command: ${command}`);
-    err.retired = _try;
-    throw err;
+    if (opts.raiseError) {
+      let err = Error(`Error running command: ${command}`);
+      err.retired = _try;
+      throw err;
+    }
   }
 
   return [stdout, stderr];

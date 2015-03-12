@@ -106,6 +106,22 @@ suite('checkout', function() {
       '3b241b02a9860354d416504a476d597783101ac5'
     );
   });
+
+  test('checkout remote branch', async function () {
+    let url = 'https://github.com/lightsofapollo/build-mozharness';
+    let dest = `${this.home}/clones/mozharness`;
+    await run([
+      'checkout',
+      dest,
+      url,
+      url,
+      'emulator-perf-new'
+    ]);
+    assert.equal(
+      (await run(['revision', dest]))[0],
+      '35d7cc561a62eaec54ca53a3d43d1443754f9c98'
+    );
+  });
 });
 
 
