@@ -1,5 +1,7 @@
 import run from '../run';
 
+let REMOTE = 'tc-vcs-remote';
+
 export async function clone(config, source, dest) {
   return await run(`${config.git} clone ${source} ${dest}`, {
     retries: 20
@@ -19,7 +21,11 @@ export async function revision(config, cwd) {
 }
 
 export async function checkoutRevision(config, cwd, repository, ref, rev) {
-  await run(`${config.git} fetch ${repository} ${ref}`, { 
+  await run(`${config.git} remote add ${REMOTE} ${repository}`, {
+    cwd,
+    raiseError: false
+  });
+  await run(`${config.git} fetch ${repository} ${ref}:refs/remotes/${REMOTE}/${ref}`, {
     cwd,
     retries: 20
   });
