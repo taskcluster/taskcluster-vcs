@@ -54,10 +54,17 @@ export async function checkoutRevision(config, cwd, repository, ref, rev) {
     cwd,
     raiseError: false
   });
-  await run(`${config.git} fetch ${repository} ${ref}:refs/remotes/${remote}/${ref}`, {
-    cwd,
-    retries: 20
-  });
+  try {
+    await run(`${config.git} fetch ${repository} ${ref}:refs/remotes/${remote}/${ref}`, {
+      cwd,
+      retries: 1
+    });
+  } catch (err) {
+    // if ref == rev, we assume that's the revision number
+    if (ref !== rev) {
+      throw err;
+    }
+  }
   await run(`${config.git} reset --hard`, { cwd });
   await run(`${config.git} checkout ${rev}`, { cwd });
 }

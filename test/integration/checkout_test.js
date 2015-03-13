@@ -138,6 +138,22 @@ suite('checkout', function() {
       'd60ffcf4b975f6f7b42215c7aed53274ceb6eb88'
     );
   });
+
+  test('checkout revision', async function () {
+    let url = 'https://github.com/lightsofapollo/build-mozharness';
+    let dest = `${this.home}/clones/mozharness`;
+    await run([
+      'checkout',
+      dest,
+      url,
+      url,
+      'd60ffcf4b975f6f7b42215c7aed53274ceb6eb88'
+    ]);
+    assert.equal(
+      (await run(['revision', dest]))[0],
+      'd60ffcf4b975f6f7b42215c7aed53274ceb6eb88'
+    );
+  });
 });
 
 
