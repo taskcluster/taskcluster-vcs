@@ -1,6 +1,33 @@
 import run from '../run';
+var path = require('path');
 
 let REMOTE = 'tc-vcs-remote';
+
+/*
+ * Return the ref remote name if it exists, otherwise
+ * returns REMOTE.
+ */
+async function getRefRemote(config, cwd, ref) {
+  let [stdout] = await run(`${config.git} branch -r`, {
+    cwd,
+    raiseError: false,
+    verbose: false,
+    buffer: true
+  });
+
+  // branches contains the list of all remote refs
+  let branches = stdout.split('\n');
+  for (var i in branches) {
+    let branch = branches[i].trim();
+    // If our ref is there and it is not the <remote>/HEAD -> <ref> line
+    if (branch.indexOf(ref) != -1 && branch.indexOf('HEAD') == -1) {
+      let remote = path.basename(path.dirname(branch));
+      return remote;
+    }
+  }
+
+  return REMOTE;
+}
 
 export async function clone(config, source, dest) {
   return await run(`${config.git} clone ${source} ${dest}`, {
@@ -21,14 +48,23 @@ export async function revision(config, cwd) {
 }
 
 export async function checkoutRevision(config, cwd, repository, ref, rev) {
-  await run(`${config.git} remote add ${REMOTE} ${repository}`, {
+  let remote = await getRefRemote(config, cwd, ref);
+  // The remote must exist, so we add it and ignore the error if it already exists.
+  await run(`${config.git} remote add ${remote} ${repository}`, {
     cwd,
     raiseError: false
   });
-  await run(`${config.git} fetch ${repository} ${ref}:refs/remotes/${REMOTE}/${ref}`, {
-    cwd,
-    retries: 20
-  });
+  try {
+    await run(`${config.git} fetch ${repository} ${ref}:refs/remotes/${remote}/${ref}`, {
+      cwd,
+      retries: 1
+    });
+  } catch (err) {
+    // if ref == rev, we assume that's the revision number
+    if (ref !== rev) {
+      throw err;
+    }
+  }
   await run(`${config.git} reset --hard`, { cwd });
   await run(`${config.git} checkout ${rev}`, { cwd });
 }
