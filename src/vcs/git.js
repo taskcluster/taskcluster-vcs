@@ -1,5 +1,4 @@
 import run from '../run';
-var path = require('path');
 
 let REMOTE = 'tc-vcs-remote';
 
@@ -21,7 +20,7 @@ async function getRefRemote(config, cwd, ref) {
     let branch = branches[i].trim();
     // If our ref is there and it is not the <remote>/HEAD -> <ref> line
     if (branch.indexOf(ref) != -1 && branch.indexOf('HEAD') == -1) {
-      let remote = path.basename(path.dirname(branch));
+      let remote = branch.split('/')[0];
       return remote;
     }
   }
