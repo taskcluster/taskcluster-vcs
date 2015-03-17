@@ -154,6 +154,22 @@ suite('checkout', function() {
       'd60ffcf4b975f6f7b42215c7aed53274ceb6eb88'
     );
   });
+
+  test('checkout slash', async function () {
+    let url = 'https://github.com/walac/tc-vcs-slash-test-case';
+    let dest = `${this.home}/clones/mozharness`;
+    await run([
+      'checkout',
+      dest,
+      url,
+      url,
+      'bugz/9999'
+    ]);
+    assert.equal(
+      (await run(['revision', dest]))[0],
+      'eafd3e166af5a77d4138790ae43a4d4f1a043d2a'
+    );
+  });
 });
 
 
