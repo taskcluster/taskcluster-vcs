@@ -1,4 +1,4 @@
-import rm from './rm';
+import { exec } from 'mz/child_process';
 import run from './run';
 import fs from 'mz/fs';
 import assert from 'assert';
@@ -53,5 +53,27 @@ suite('clone', function() {
     await testCache(`${home}/cache-1`);
     await testCache(`${home}/cache-2`);
     await testCache(`${home}/cache-3`);
+  });
+
+
+  test('cached after tar failure', async function () {
+    let home = this.home;
+    let dest = `${this.home}/tar-fail`;
+    let alias = 'github.com/lightsofapollo/tc-vcs-cache';
+    let url = `https://${alias}`;
+    let cachePath = `${home}/clones/${alias}.tar.gz`;
+
+    // Create and cache the clone...
+    await run(['create-clone-cache', url]);
+    await run(['clone', url, dest]);
+    // Clean dest before cloning again...
+    await exec(`rm -Rf ${dest}`);
+
+    await fs.writeFile(cachePath, 'some junk wtf...', 'utf8');
+    await run(['clone', url, dest]);
+
+    assert((await fs.exists(dest)), 'path exists');
+    let rev = await run(['revision', dest]);
+    assert.ok(!(await fs.exists(cachePath)), 'cache was removed...');
   });
 });
