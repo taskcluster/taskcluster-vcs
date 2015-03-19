@@ -81,7 +81,7 @@ export default class Artifacts {
           e.stack
         );
         // Destroy cache...
-        await run(`rm -Rf ${localPath}`);
+        await run(`rm -Rf ${localPath} ${dest}`);
         // Intentionally falling through...
       }
     }

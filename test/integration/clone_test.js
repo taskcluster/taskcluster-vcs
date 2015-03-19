@@ -73,7 +73,7 @@ suite('clone', function() {
     await run(['clone', url, dest]);
 
     assert((await fs.exists(dest)), 'path exists');
-    let rev = await run(['revision', dest]);
+    await run(['revision', dest]);
     assert.ok(!(await fs.exists(cachePath)), 'cache was removed...');
   });
 });
