@@ -69,8 +69,21 @@ export default class Artifacts {
   async useIfAvailable(name, namespace, dest) {
     let localPath = this.lookupLocal(name);
     if (await fs.exists(localPath)) {
-      await this.extract(localPath, dest);
-      return true;
+      // Attempt to extract from local tar if this fails then allow remote
+      // download to be attempted...
+      try {
+        await this.extract(localPath, dest);
+        return true;
+      } catch (e) {
+        console.error(
+          'Error extracting tar re-downloading',
+          localPath,
+          e.stack
+        );
+        // Destroy cache...
+        await run(`rm -Rf ${localPath} ${dest}`);
+        // Intentionally falling through...
+      }
     }
 
     let remoteUrl =
