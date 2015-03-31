@@ -54,7 +54,7 @@ export async function checkoutRevision(config, cwd, repository, ref, rev) {
     raiseError: false
   });
   try {
-    await run(`${config.git} fetch ${repository} ${ref}:refs/remotes/${remote}/${ref}`, {
+    await run(`${config.git} fetch -f ${repository} ${ref}:refs/remotes/${remote}/${ref}`, {
       cwd,
       retries: 1
     });
