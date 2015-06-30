@@ -4,6 +4,6 @@ FROM node:latest
 RUN git config --global user.email "you@example.com" && \
     git config --global user.name "Your Name"
 
-RUN npm install -g taskcluster-vcs@2.0.2 --no-optional
+RUN npm install -g taskcluster-vcs@2.3.4 --no-optional
 ENTRYPOINT ["tc-vcs"]
 
