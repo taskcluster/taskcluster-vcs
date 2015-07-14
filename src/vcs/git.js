@@ -119,3 +119,10 @@ export async function branchName(config, cwd) {
   });
   return stdout.trim();
 }
+
+export async function pull(config, cwd, source) {
+  return await run(`${config.git} fetch ${source}`, {
+    cwd,
+    retries: 1,
+  });
+}
