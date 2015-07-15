@@ -4,7 +4,7 @@ import eventToPromise from 'event-to-promise';
 import fs from 'fs';
 
 const DEFAULT_RETRIES = 10;
-const RETRY_SLEEP = 1000;
+const RETRY_SLEEP = 10000;
 
 /**
 Wrapper around process spawning with extra logging.
@@ -70,7 +70,7 @@ export default async function run(command, config = {}, _try=0) {
       );
 
       // Sleep for a bit..
-      await new Promise(accept => setTimeout(accept, _try * RETRY_SLEEP));
+      await new Promise(accept => setTimeout(accept, Math.pow(2, _try) * RETRY_SLEEP));
       let retryOpts = Object.assign({}, opts);
 
       // Issue the retry...
