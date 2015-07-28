@@ -45,10 +45,15 @@ export default async function main(config, argv) {
     args.dest
   );
 
-  // If we did not have the chance to utilize a cache clone the long way...
-  if (!usedCache) {
-    let vcsConfig = await detect(args.url);
-    let vcs = require('../vcs/' + vcsConfig.type);
+  let vcsConfig = await detect(args.url);
+  let vcs = require('../vcs/' + vcsConfig.type);
+
+  // If we used a cache, pull from latest upstream so we have latest
+  // commits. Else, fall back to a full clone. The end state should be
+  // reasonable consistent.
+  if (usedCache) {
+    await vcs.pull(config, args.dest, args.url);
+  } else {
     await vcs.clone(config, args.url, args.dest);
   }
 }

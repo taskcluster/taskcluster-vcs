@@ -30,7 +30,7 @@ async function getRefRemote(config, cwd, ref) {
 
 export async function clone(config, source, dest) {
   return await run(`${config.git} clone ${source} ${dest}`, {
-    retries: 20
+    retries: 1
   });
 }
 
@@ -118,4 +118,11 @@ export async function branchName(config, cwd) {
     buffer: true
   });
   return stdout.trim();
+}
+
+export async function pull(config, cwd, source) {
+  return await run(`${config.git} fetch ${source}`, {
+    cwd,
+    retries: 1,
+  });
 }
