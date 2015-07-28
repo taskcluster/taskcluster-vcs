@@ -4,7 +4,8 @@ import eventToPromise from 'event-to-promise';
 import fs from 'fs';
 
 const DEFAULT_RETRIES = 10;
-const RETRY_SLEEP = 1000;
+const RETRY_SLEEP = 10000;
+const RANDOMIZATION_FACTOR = 0.25;
 
 /**
 Wrapper around process spawning with extra logging.
@@ -70,7 +71,10 @@ export default async function run(command, config = {}, _try=0) {
       );
 
       // Sleep for a bit..
-      await new Promise(accept => setTimeout(accept, _try * RETRY_SLEEP));
+      let delay = Math.pow(2, _try) * RETRY_SLEEP;
+      let rf = RANDOMIZATION_FACTOR; // Apply randomization factor
+      delay = delay * (Math.random() * 2 * rf + 1 - rf);
+      await new Promise(accept => setTimeout(accept, delay));
       let retryOpts = Object.assign({}, opts);
 
       // Issue the retry...
