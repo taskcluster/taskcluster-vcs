@@ -1,11 +1,12 @@
 #! /bin/bash -e
 
 run_clone () {
-  node task.js create-clone-cache --upload --proxy $1 | taskcluster run-task &
+  echo "Run Clone $1"
+  node task.js create-clone-cache --upload --proxy $1 | taskcluster run-task --verbose &
 }
 
 run_repo () {
-  node task.js create-repo-cache --upload --proxy https://git.mozilla.org/b2g/B2G $1 | taskcluster run-task &
+  node task.js create-repo-cache --upload --proxy https://git.mozilla.org/b2g/B2G $1 | taskcluster run-task --verbose &
 }
 
 emulator_url () {
@@ -48,6 +49,7 @@ run_repo $(emulator_url emulator-ics)
 run_repo $(emulator_url emulator)
 run_repo $(emulator_url emulator-jb)
 run_repo $(emulator_url emulator-kk)
+run_repo $(emulator_url aries)
 run_repo $(emulator_url flame)
 run_repo $(emulator_url flame-kk)
 run_repo $(emulator_url nexus-4)
