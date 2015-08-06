@@ -10,11 +10,12 @@
   "scripts": {
     "prepublish": "6to5 -s -e src --out-dir build",
     "test": "mocha $(find test -name '*_test.js')",
-    "test-no-upload": "mocha $(find test -name '*_test.js') --grep '@taskcluster' --invert"
+    "test-no-upload": "mocha $(find test -name '*_test.js') --grep '@taskcluster' --invert",
+    "preinstall": "npm install -g taskcluster-cli"
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/lightsofapollo/taskcluster-vcs.git"
+    "url": "git://github.com/taskcluster/taskcluster-vcs.git"
   },
   "author": "James Lal [:lightsofapollo]",
   "license": "Apache2",
@@ -43,7 +44,8 @@
     "tar-stream": "^1.1.1",
     "taskcluster-client": "^0.19.4",
     "url-join": "0.0.1",
-    "xml2js": "^0.4.4"
+    "xml2js": "^0.4.4",
+    "taskcluster-cli": "^0.5.3"
   },
   "devDependencies": {
     "mocha": "^2.0.1",
