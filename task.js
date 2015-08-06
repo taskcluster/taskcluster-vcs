@@ -1,3 +1,11 @@
+// To configure, define in your environment:
+//   OWNER_EMAIL
+//   TASKCLUSTER_ACCESS_TOKEN
+//   TASKCLUSTER_CLIENT_ID
+//
+// Notes:
+// * Only supports a workerType with permacreds at this time.
+
 var date = new Date();
 var deadline = new Date(date.valueOf() + 3600 * 1000);
 
@@ -20,9 +28,9 @@ var task = {
   },
   metadata: {
     name: 'cache',
-    description: 'cache',
-    owner: 'jlal@mozilla.com',
-    source: 'http://todo.com'
+    description: process.argv.slice(2).join(' '),
+    owner: process.env.OWNER_EMAIL,
+    source: 'https://github.com/taskcluster/taskcluster-vcs'
   }
 };
 

@@ -1,11 +1,29 @@
 #! /bin/bash -e
 
+##########################################
+# To run:
+#
+# 1. Define in your environment:
+#   OWNER_EMAIL
+#   TASKCLUSTER_ACCESS_TOKEN
+#   TASKCLUSTER_CLIENT_ID
+#
+# 2. Run on the command-line:
+#
+#    ./cache.sh
+#
+#  It currently emits tons of logspam, so probably redirect that to some files:
+#
+#    ./cache.sh > >(tee stdout.log) 2> >(tee stderr.log >&2)
+#
+
 run_clone () {
-  echo "Run Clone $1"
+  echo "Run clone cache $1"
   node task.js create-clone-cache --upload --proxy $1 | taskcluster run-task --verbose &
 }
 
 run_repo () {
+  echo "Run repo cache $1"
   node task.js create-repo-cache --upload --proxy https://git.mozilla.org/b2g/B2G $1 | taskcluster run-task --verbose &
 }
 
