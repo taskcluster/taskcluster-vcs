@@ -39,7 +39,8 @@ export default async function main(config, argv) {
   let namespace = `${args.namespace}.${createHash(alias)}`;
   let artifacts = new Artifacts(config.cloneCache);
 
-  let usedCache = await artifacts.useIfAvailable(
+  // Download a cached copy if possible.
+  let archivePath = await artifacts.downloadIfUnavailable(
     alias,
     namespace,
     args.dest
@@ -48,10 +49,11 @@ export default async function main(config, argv) {
   let vcsConfig = await detect(args.url);
   let vcs = require('../vcs/' + vcsConfig.type);
 
-  // If we used a cache, pull from latest upstream so we have latest
+  // If we have a cached copy, extract and pull from latest upstream so we have latest
   // commits. Else, fall back to a full clone. The end state should be
   // reasonable consistent.
-  if (usedCache) {
+  if (archivePath) {
+    await artifacts.extract(archivePath, args.dest);
     await vcs.pull(config, args.dest, args.url);
   } else {
     await vcs.clone(config, args.url, args.dest);

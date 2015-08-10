@@ -48,7 +48,7 @@ export default async function run(command, config = {}, _try=0) {
 
 
   await Promise.all([
-    eventToPromise(proc.stderr, 'end'),
+    eventToPromise(proc.stdout, 'end'),
     eventToPromise(proc.stderr, 'end'),
     eventToPromise(proc, 'exit')
   ])
