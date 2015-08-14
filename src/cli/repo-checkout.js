@@ -125,34 +125,47 @@ export default async function main(config, argv) {
     projects: {}
   };
 
-  await Promise.all(projects.map(async (project) => {
-    let projectStart = Date.now();
+  let archivesToExtract = await Promise.all(projects.map(async (project) => {
+    let downloadStart = Date.now();
+    stats.projects[project.name] = {duration: 0};
+
     let repoPath =
       fsPath.join(args.directory, '.repo', 'projects', `${project.path}.git`);
-
-    // Only attempt to use caches if the project does not exist... Tar will
-    // happy clobber things that likely should not be clobbered if expansion is
-    // triggered from the cache...
-    if (!await fs.exists(repoPath)) {
-      let name = `${urlAlias(project.remote)}/${args.branch}`;
-
-      await artifacts.useIfAvailable(
-        name,
-        `${args.namespace}.${createHash(name)}`,
-        args.directory
-      );
-    }
-
-    if (canUseParallelSync) {
-      await vcsRepo.sync(args.directory, { project: project.name });
-    }
-
-    stats.projects[project.name] = {
-      duration: Date.now() - projectStart
+    let name = `${urlAlias(project.remote)}/${args.branch}`;
+    let namespace = `${args.namespace}.${createHash(name)}`;
+    let archiveDetails = {
+      projectName: project.name
     };
+
+    // Only attempt to use caches if the project does not already exist.
+    if (!await fs.exists(repoPath)) {
+      archiveDetails.archivePath =
+        await artifacts.downloadIfUnavailable(name, namespace, args.directory);
+    }
+
+    stats.projects[project.name].duration += Date.now() - downloadStart;
+
+    return archiveDetails;
   }));
 
-  if (!canUseParallelSync) {
+  // Extraction of archives should *not* be done in parallel because of race
+  // conditions with writing to the same directories.
+  for (let archive of archivesToExtract) {
+    if (!archive.archivePath) continue;
+    let extractStart = Date.now();
+
+    await artifacts.extract(archive.archivePath, args.directory);
+
+    stats.projects[archive.projectName].duration += Date.now() - extractStart;
+  }
+
+  if (canUseParallelSync) {
+    await Promise.all(projects.map(async (project) => {
+        let syncStart = Date.now();
+        await vcsRepo.sync(args.directory, { project: project.name });
+        stats.projects[project.name].duration += Date.now() - syncStart
+    }));
+  } else {
     await vcsRepo.sync(args.directory);
   }
 

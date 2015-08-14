@@ -63,40 +63,23 @@ export default class Artifacts {
   }
 
   /**
-  Find and extract an artifact if possible returns true if one is
-  found/extracted false otherwise...
+  Find a possible cached archive and download if possible.
   */
-  async useIfAvailable(name, namespace, dest) {
+  async downloadIfUnavailable(name, namespace, dest) {
     let localPath = this.lookupLocal(name);
+
     if (await fs.exists(localPath)) {
-      // Attempt to extract from local tar if this fails then allow remote
-      // download to be attempted...
-      try {
-        await this.extract(localPath, dest);
-        return true;
-      } catch (e) {
-        console.error(
-          'Error extracting tar re-downloading',
-          localPath,
-          e.stack
-        );
-        // Destroy cache...
-        await run(`rm -Rf ${localPath} ${dest}`);
-        // Intentionally falling through...
-      }
+      return localPath;
     }
 
     let remoteUrl =
       await this.lookupRemote(namespace, this.nameToArtifact(name));
 
-    if (!remoteUrl) {
-      return false;
-    }
+    if (!remoteUrl) return;
 
     await this.download(remoteUrl, localPath);
-    await this.extract(localPath, dest);
 
-    return true;
+    return localPath;
   }
 
   /**
@@ -128,10 +111,12 @@ export default class Artifacts {
     await mkdirp(dest);
     assert(await fs.exists(source), `${source} must exist to extract...`);
     assert(dest, 'must pass dest...');
-    await run(render(this.config.extract, {
+    let cmd = render(
+      this.config.extract, {
       source,
       dest
-    }));
+    });
+    await run(cmd);
   }
 
   /**
