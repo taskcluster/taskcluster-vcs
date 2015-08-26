@@ -104,7 +104,7 @@ export default async function main(config, argv) {
     }
     if (vcsConfig.type != remoteVcsConfig.type) {
       console.warn(
-        '[tc-vcs] Local cache is not same vcs type as remote purging...'
+        '[taskcluster-vcs:warning] Local cache is not same vcs type as remote purging...'
       );
       await run(`rm -Rf ${args.directory}`);
       await clone(config, [args.baseUrl, args.directory]);

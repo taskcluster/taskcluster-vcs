@@ -93,7 +93,13 @@ export default class Artifacts {
       url: remoteUrl,
       dest: localPath
     });
-    await run(cmd, { retries: 20 });
+
+    try {
+      await run(cmd, { retries: 20 });
+    } catch(e) {
+      console.log('[taskcluster-vcs:error] Error when downloading from remote url');
+      throw e;
+    }
   }
 
   async upload(source, url) {
@@ -116,7 +122,14 @@ export default class Artifacts {
       source,
       dest
     });
-    await run(cmd);
+
+    try {
+      await run(cmd);
+    } catch(e) {
+      console.error('[taskcluster-vcs:error] Error when extracting archive');
+      throw e;
+    }
+
   }
 
   /**

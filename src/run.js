@@ -30,7 +30,7 @@ export default async function run(command, config = {}, _try=0) {
   let cwd = opts.cwd || process.cwd();
   var start = Date.now();
   if (opts.verbose) {
-    console.log(`[tc-vcs] ${_try} run start : (cwd: ${cwd}) ${command}`);
+    console.log(`[taskcluster-vcs] ${_try} run start : (cwd: ${cwd}) ${command}`);
   }
   var proc = spawn('/bin/bash', ['-c'].concat(command), opts);
   let stdout = '';
@@ -53,32 +53,39 @@ export default async function run(command, config = {}, _try=0) {
     eventToPromise(proc, 'exit')
   ])
 
-  if (opts.verbose) {
+  if (opts.verbose && proc.exitCode == 0) {
     console.log(
-      '[tc-vcs] run end : %s (%s) in %s ms',
+      '[taskcluster-vcs] run end : %s (%s) in %s ms',
       command, proc.exitCode, Date.now() - start
     );
   }
 
   if (proc.exitCode != 0) {
     if (_try < opts.retries) {
+      let delay = Math.pow(2, _try) * RETRY_SLEEP;
+      let rf = RANDOMIZATION_FACTOR; // Apply randomization factor
+      delay = delay * (Math.random() * 2 * rf + 1 - rf);
+
       console.error(
-        '[tc-vcs] run end (with error) try (%d/%d) retrying in %d ms : %s',
+        '[taskcluster-vcs:warning] run end (with error) try (%d/%d) retrying in %d ms : %s',
         _try,
         opts.retries,
-        RETRY_SLEEP,
+        delay,
         command
       );
 
       // Sleep for a bit..
-      let delay = Math.pow(2, _try) * RETRY_SLEEP;
-      let rf = RANDOMIZATION_FACTOR; // Apply randomization factor
-      delay = delay * (Math.random() * 2 * rf + 1 - rf);
       await new Promise(accept => setTimeout(accept, delay));
+
       let retryOpts = Object.assign({}, opts);
 
       // Issue the retry...
       return await run(command, retryOpts, _try + 1);
+    } else {
+      console.error(
+        '[taskcluster-vcs:error] run end (with error) NOT RETRYING!: %s',
+        command
+      );
     }
 
     if (opts.raiseError) {
