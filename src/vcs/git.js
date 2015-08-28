@@ -66,6 +66,9 @@ export async function checkoutRevision(config, cwd, repository, ref, rev) {
   }
   await run(`${config.git} reset --hard`, { cwd });
   await run(`${config.git} checkout ${rev}`, { cwd });
+
+  // Fixes issue with local master checkout
+  await run(`${config.git} merge ${remote}/${ref}`, { cwd });
 }
 
 /**
