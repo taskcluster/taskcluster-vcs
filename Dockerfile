@@ -1,9 +1,9 @@
 FROM node:latest
 
 # Repo is unhappy unless we configure git...
-RUN git config --global user.email "you@example.com" && \
-    git config --global user.name "Your Name"
+RUN git config --global user.email "taskcluster-vcs@example.nomail" && \
+    git config --global user.name "Taskcluster VCS"
 
-RUN npm install -g taskcluster-vcs@2.3.4 --no-optional
+RUN npm install -g taskcluster-vcs@2.3.11 --no-optional
 ENTRYPOINT ["tc-vcs"]
 
