@@ -1,3 +1,4 @@
+import request from 'superagent-promise';
 import run from './run';
 import render from 'json-templater/string';
 import fs from 'mz/fs';
@@ -54,12 +55,27 @@ export default class Artifacts {
     } catch (e) {
       // 404 will throw so validate before returning null...
       if (e.code && e.code != 404) throw e;
+      console.error(
+        `[taskcluster-vcs:warning] No task indexed for namespace "${namespace}"`
+      );
       return null;
     }
 
-    return this.queue.buildUrl(
+    let artifactUrl = this.queue.buildUrl(
       this.queue.getLatestArtifact, task.taskId, artifact
     );
+
+    let res = await request.head(artifactUrl).end();
+    if (res.status === 404) {
+      console.error(
+        `[taskcluster-vcs:error] Artifact "${artifact}" not found ` +
+        `for task ID ${task.taskId}.  This could be caused by the artifact ` +
+        'not being created or being marked as expired.'
+      );
+      return null;
+    }
+
+    return artifactUrl;
   }
 
   /**

@@ -33,6 +33,12 @@ export default async function main(config, argv) {
     help: 'Taskcluster Index namespace'
   });
 
+  parser.addArgument(['--force-clone'], {
+    action: 'storeTrue',
+    defaultValue: false,
+    help: 'Clone from remote repository when cached copy is not available'.trim()
+  });
+
   parser.addArgument(['url'], {
     help: 'url which to clone from'
   });
@@ -40,9 +46,14 @@ export default async function main(config, argv) {
   // configuration for clone/update....
   let args = parser.parseArgs(argv);
   let dir = temp.path('tc-vcs-create-clone-cache');
+  let checkoutArgs = [dir, args.url, '--namespace', args.namespace]
+
+  if (args.force_clone) {
+    checkoutArgs.unshift('--force-clone');
+  }
 
   // Clone and update cache...
-  await checkout(config, [dir, args.url, '--namespace', args.namespace]);
+  await checkout(config, checkoutArgs);
 
   let queue = clitools.getTcQueue(args.proxy);
   let index = clitools.getTcIndex(args.proxy);
