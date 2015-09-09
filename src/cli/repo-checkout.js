@@ -36,6 +36,12 @@ export default async function main(config, argv) {
     `.trim()
   });
 
+  parser.addArgument(['--force-clone'], {
+    action: 'storeTrue',
+    defaultValue: false,
+    help: 'Clone from remote repository when cached copy is not available'.trim()
+  });
+
   parser.addArgument(['-b', '--branch'], {
     dest: 'branch',
     defaultValue: 'master',
@@ -104,6 +110,10 @@ export default async function main(config, argv) {
     // don't include values that are null, etc...
     return !!v;
   });
+
+  if (args.force_clone) {
+    checkoutArgs.unshift('--force-clone');
+  }
 
   // Checkout the underlying repository before running repo...
   await checkout(config, checkoutArgs);
