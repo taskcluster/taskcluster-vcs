@@ -28,7 +28,7 @@ suite('create clone cache', function() {
   });
 
   test('@taskcluster upload cache', async function() {
-    let namespace = 'public.test.jlal.' + slugid.v4();
+    let namespace = 'public.test.taskcluster-vcs-garbage.' + slugid.v4();
     let taskId = await createTask();
 
     let alias = 'bitbucket.org/lightsofapollo/hgtesting'
