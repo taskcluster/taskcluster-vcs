@@ -82,17 +82,20 @@ export default async function run(command, config = {}, _try=0) {
       // Issue the retry...
       return await run(command, retryOpts, _try + 1);
     } else {
-      console.error(
-        '[taskcluster-vcs:error] run end (with error) NOT RETRYING!: %s',
-        command
-      );
+      // Only log message as an error if raiseError is enabled, otherwise treat it
+      // as a warning
+      let message = '[taskcluster-vcs:%s] run end (with error) NOT RETRYING!: %s';
+
+      if (opts.raiseError) {
+        console.error(message, 'error', command);
+        let err = Error(`Error running command: ${command}`);
+        err.retired = _try;
+        throw err;
+      } else {
+        console.log(message, 'warning', command);
+      }
     }
 
-    if (opts.raiseError) {
-      let err = Error(`Error running command: ${command}`);
-      err.retired = _try;
-      throw err;
-    }
   }
 
   return [stdout, stderr];
