@@ -42,6 +42,12 @@ export default async function main(config, argv) {
     help: 'branch argument to pass (-b) to repo init'
   });
 
+  parser.addArgument(['-j', '--jobs'], {
+    dest: 'concurrency',
+    defaultValue: 1,
+    help: 'Number of projects to sync in parallel'
+  });
+
   parser.addArgument(['directory'], {
     type: (value) => {
       return fsPath.resolve(value);
@@ -102,11 +108,6 @@ export default async function main(config, argv) {
   // Checkout the underlying repository before running repo...
   await checkout(config, checkoutArgs);
 
-  // Running repo sync in parallel is only safe for entirely new initializations
-  // when we can though this is up to 2x faster...
-  let canUseParallelSync =
-    !await fs.exists(fsPath.join(args.directory, '.repo'));
-
   // Initialize the directory with the repo command...
   await vcsRepo.init(args.directory, args.manifest, {
     branch: args.branch,
@@ -159,15 +160,7 @@ export default async function main(config, argv) {
     stats.projects[archive.projectName].duration += Date.now() - extractStart;
   }
 
-  if (canUseParallelSync) {
-    await Promise.all(projects.map(async (project) => {
-        let syncStart = Date.now();
-        await vcsRepo.sync(args.directory, { project: project.name });
-        stats.projects[project.name].duration += Date.now() - syncStart
-    }));
-  } else {
-    await vcsRepo.sync(args.directory);
-  }
+  await vcsRepo.sync(args.directory, { concurrency: args.concurrency });
 
   stats.duration = Date.now() - start;
   stats.stop = new Date();

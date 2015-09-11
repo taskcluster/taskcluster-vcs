@@ -149,7 +149,7 @@ export async function init(cwd, manifest, opts={}) {
 
 export async function sync(cwd, opts={}) {
   opts = Object.assign({
-    concurrency: 100,
+    concurrency: 1,
     project: null
   }, opts);
 
