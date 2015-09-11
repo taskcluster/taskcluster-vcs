@@ -26,7 +26,11 @@ async function main(argv) {
         'https://github.com/mozilla-b2g/B2G',
         'https://github.com/mozilla-b2g/B2G-manifest',
         'https://github.com/mozilla-b2g/moztt',
-        'https://github.com/mozilla/gecko-dev'
+        'https://github.com/mozilla/gecko-dev',
+        'https://git.mozilla.org/build/tooltool.git',
+        'https://git.mozilla.org/external/google/gerrit/git-repo.git',
+        'https://hg.mozilla.org/projects/alder',
+        'https://hg.mozilla.org/projects/alder/'
     ];
 
 
