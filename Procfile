@@ -1,1 +1,1 @@
-refreshCache: ./cache.sh
+refreshCache: babel-node ./src/cache.js
