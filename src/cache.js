@@ -44,10 +44,7 @@ async function main(argv) {
         ['emulator_url', 'flame-kk'],
         ['emulator_url', 'nexus-4'],
         ['emulator_url', 'emulator-l'],
-        ['emulator_url', 'dolphin']
-    ];
-
-    var g_emulators = [
+        ['emulator_url', 'dolphin'],
         ['g_emulator_url', 'emulator.xml'],
         ['g_emulator_url', 'emulator-jb.xml'],
         ['g_emulator_url', 'emulator-kk.xml'],
@@ -55,32 +52,29 @@ async function main(argv) {
     ];
 
 
+    var tasks = [];
+
     for (var i in clones) {
         var task = generateCloneTaskDefinition(clones[i]);
-        await run(`echo '${task}' | taskcluster run-task --verbose`, {
-            raiseError: true,
-            verbose: true,
-            buffer: false,
-        });
+        tasks.push(`echo '${task}' | taskcluster run-task --verbose`);
     }
     for (var j in emulators) {
         var task = generateRepoCacheTaskDefinition(emulators[j][1], emulators[j][0]);
-        console.log(task);
-        await run(`echo '${task}' | taskcluster run-task --verbose`, {
-            raiseError: true,
-            verbose: true,
-            buffer: false,
-        });
+        tasks.push(`echo '${task}' | taskcluster run-task --verbose`);
     }
-    for (var k in g_emulators) {
-        var task = generateRepoCacheTaskDefinition(g_emulators[k][1], g_emulators[k][0]);
-        console.log(task);
-        await run(`echo '${task}' | taskcluster run-task --verbose`, {
-            raiseError: true,
-            verbose: true,
-            buffer: false,
-        });
-   }
+
+    let errors = [];
+    await Promise.all(tasks.map((task) => {
+          return run(task, {
+              raiseError: true,
+              verbose: true,
+              buffer: false,
+          }).catch((err) => { errors.push(err) });
+    }));
+
+    for (var i in errors) {
+        console.log(errors[i]);
+    }
 };
 
 main(process.argv);
