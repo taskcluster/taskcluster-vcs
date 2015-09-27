@@ -54,12 +54,12 @@ async function main(argv) {
 
     var tasks = [];
 
-    for (var i in clones) {
-        var task = generateCloneTaskDefinition(clones[i]);
+    for (var url of clones) {
+        var task = generateCloneTaskDefinition(url);
         tasks.push(`echo '${task}' | taskcluster run-task --verbose`);
     }
-    for (var j in emulators) {
-        var task = generateRepoCacheTaskDefinition(emulators[j][1], emulators[j][0]);
+    for (var emulator of emulators) {
+        var task = generateRepoCacheTaskDefinition(emulator[1], emulator[0]);
         tasks.push(`echo '${task}' | taskcluster run-task --verbose`);
     }
 
@@ -72,8 +72,8 @@ async function main(argv) {
           }).catch((err) => { errors.push(err) });
     }));
 
-    for (var i in errors) {
-        console.log(errors[i]);
+    for (var error of errors) {
+        console.log(error);
     }
 };
 

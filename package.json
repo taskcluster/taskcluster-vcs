@@ -17,7 +17,7 @@
     "type": "git",
     "url": "git://github.com/taskcluster/taskcluster-vcs.git"
   },
-  "author": "James Lal [:lightsofapollo]",
+  "author": "TaskCluster Team",
   "license": "Apache2",
   "bugs": {
     "url": "https://github.com/taskcluster/taskcluster-vcs/issues"
