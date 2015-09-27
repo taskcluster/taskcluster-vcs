@@ -9,7 +9,7 @@
 export function generateCloneTaskDefinition(repo) {
 
     var date = new Date();
-    var deadline = new Date(date.valueOf() + 3600 * 1000);
+    var deadline = new Date(date.valueOf() + 4 * (3600 * 1000));
     var params = ['create-clone-cache', '--upload', '--proxy', repo]
 
     var task = {
@@ -19,7 +19,7 @@ export function generateCloneTaskDefinition(repo) {
       deadline: deadline,
       scopes: ['queue:*', 'index:*'],
       payload: {
-        image: 'taskcluster/taskcluster-vcs:2.3.11',
+        image: 'taskcluster/taskcluster-vcs:2.3.13',
         command: params,
         maxRunTime: 3600,
         features: {
@@ -44,7 +44,7 @@ export function generateCloneTaskDefinition(repo) {
 
 export function generateRepoCacheTaskDefinition(emulator, type) {
     var date = new Date();
-    var deadline = new Date(date.valueOf() + 3600 * 1000);
+    var deadline = new Date(date.valueOf() + 4 * (3600 * 1000));
     var repo = '';
     if (type === 'emulator_url') {
         repo = "http://hg.mozilla.org/mozilla-central/raw-file/default/b2g/config/" + emulator + "/sources.xml";
@@ -62,7 +62,7 @@ export function generateRepoCacheTaskDefinition(emulator, type) {
       deadline: deadline,
       scopes: ['queue:*', 'index:*'],
       payload: {
-        image: 'taskcluster/taskcluster-vcs:2.3.11',
+        image: 'taskcluster/taskcluster-vcs:2.3.13',
         command: params,
         maxRunTime: 3600,
         features: {

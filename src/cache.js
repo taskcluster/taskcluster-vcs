@@ -45,6 +45,7 @@ async function main(argv) {
         ['emulator_url', 'nexus-4'],
         ['emulator_url', 'emulator-l'],
         ['emulator_url', 'dolphin'],
+        ['emulator_url', 'dolphin-512'],
         ['g_emulator_url', 'emulator.xml'],
         ['g_emulator_url', 'emulator-jb.xml'],
         ['g_emulator_url', 'emulator-kk.xml'],
