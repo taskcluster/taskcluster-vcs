@@ -1,6 +1,6 @@
 {
   "name": "taskcluster-vcs",
-  "version": "2.3.12",
+  "version": "2.3.13",
   "description": "Version control tools for taskcluster images",
   "main": "./build/bin/tc-vcs",
   "preferGlobal": true,
@@ -10,13 +10,14 @@
   "scripts": {
     "prepublish": "6to5 -s -e src --out-dir build",
     "test": "mocha $(find test -name '*_test.js')",
-    "test-no-upload": "mocha $(find test -name '*_test.js') --grep '@taskcluster' --invert"
+    "test-no-upload": "mocha $(find test -name '*_test.js') --grep '@taskcluster' --invert",
+    "preinstall": "npm install -g taskcluster-cli"
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/lightsofapollo/taskcluster-vcs.git"
+    "url": "git://github.com/taskcluster/taskcluster-vcs.git"
   },
-  "author": "James Lal [:lightsofapollo]",
+  "author": "TaskCluster Team",
   "license": "Apache2",
   "bugs": {
     "url": "https://github.com/taskcluster/taskcluster-vcs/issues"
