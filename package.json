@@ -1,6 +1,6 @@
 {
   "name": "taskcluster-vcs",
-  "version": "2.3.13",
+  "version": "2.3.14",
   "description": "Version control tools for taskcluster images",
   "main": "./build/bin/tc-vcs",
   "preferGlobal": true,
@@ -10,8 +10,7 @@
   "scripts": {
     "prepublish": "6to5 -s -e src --out-dir build",
     "test": "mocha $(find test -name '*_test.js')",
-    "test-no-upload": "mocha $(find test -name '*_test.js') --grep '@taskcluster' --invert",
-    "preinstall": "npm install -g taskcluster-cli"
+    "test-no-upload": "mocha $(find test -name '*_test.js') --grep '@taskcluster' --invert"
   },
   "repository": {
     "type": "git",
