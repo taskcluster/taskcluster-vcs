@@ -19,7 +19,7 @@ export function generateCloneTaskDefinition(repo) {
       deadline: deadline,
       scopes: ['queue:*', 'index:*'],
       payload: {
-        image: 'taskcluster/taskcluster-vcs:2.3.13',
+        image: 'taskcluster/taskcluster-vcs:2.3.14',
         command: params,
         maxRunTime: 3600,
         features: {
@@ -62,7 +62,7 @@ export function generateRepoCacheTaskDefinition(emulator, type) {
       deadline: deadline,
       scopes: ['queue:*', 'index:*'],
       payload: {
-        image: 'taskcluster/taskcluster-vcs:2.3.13',
+        image: 'taskcluster/taskcluster-vcs:2.3.14',
         command: params,
         maxRunTime: 3600,
         features: {
