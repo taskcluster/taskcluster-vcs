@@ -19,7 +19,7 @@ suite('vcs/repo', function() {
       let dir = `${this.home}/test`;
 
       // cheat by checking out the repository
-      await run(['checkout', dir, url]);
+      await run(['checkout', '--force-clone', dir, url]);
       await vcsRepo.init(dir, manifest);
       await vcsRepo.sync(dir);
     });
@@ -29,7 +29,7 @@ suite('vcs/repo', function() {
       let dir = `${this.home}/test`;
 
       // cheat by checking out the repository
-      await run(['checkout', dir, url]);
+      await run(['checkout', '--force-clone', dir, url]);
       await vcsRepo.init(dir, `${dir}/includes.xml`);
       await vcsRepo.sync(dir);
     });

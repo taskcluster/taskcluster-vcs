@@ -66,7 +66,7 @@ suite('clone', function() {
     await testCache(`${home}/cache-3`);
   });
 
-  test('force-clone disabled (by default) - fails to clone', async function(done) {
+  test('@taskcluster force-clone disabled (by default) - fails to clone', async function(done) {
     let alias = 'bitbucket.org/lightsofapollo/hgtesting'
     let dest = `${this.home}/hg`;
     let namespace = `public.test.taskcluster-vcs-garbage.${slugid.v4()}`;
@@ -101,7 +101,7 @@ suite('clone', function() {
     assert(false, 'Command completed successfully when it should not have');
   });
 
-  test('force-clone enabled - clone from repository when no artifact present', async function() {
+  test('@taskcluster force-clone enabled - clone from repository when no artifact present', async function() {
     let alias = 'bitbucket.org/lightsofapollo/hgtesting'
     let dest = `${this.home}/hg`;
     let namespace = `public.test.taskcluster-vcs-garbage.${slugid.v4()}`;

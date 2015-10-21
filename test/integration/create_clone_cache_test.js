@@ -16,14 +16,14 @@ suite('create clone cache', function() {
   test('create cache (git)', async function() {
     let alias = 'bitbucket.org/lightsofapollo/gittesting'
     let url = `https://${alias}`;
-    await run(['create-clone-cache', url])
+    await run(['create-clone-cache', '--force-clone', url])
     assert(fs.exists(`${this.home}/clones/${alias}.tar.gz`));
   });
 
   test('create cache (hg)', async function() {
     let alias = 'bitbucket.org/lightsofapollo/hgtesting'
     let url = `https://${alias}`;
-    await run(['create-clone-cache', url])
+    await run(['create-clone-cache', '--force-clone', url])
     assert(fs.exists(`${this.home}/clones/${alias}.tar.gz`));
   });
 
@@ -38,6 +38,7 @@ suite('create clone cache', function() {
     await run([
       'create-clone-cache',
       url,
+      '--force-clone',
       '--namespace', namespace,
       '--task-id', taskId,
       '--run-id=0',

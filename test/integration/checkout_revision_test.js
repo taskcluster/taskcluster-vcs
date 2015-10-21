@@ -8,7 +8,7 @@ suite('checkout-revision', function() {
   test('(git) cached -> then update', async function () {
     let alias = 'github.com/lightsofapollo/tc-vcs-cache';
     let url = `https://${alias}`;
-    await run(['create-clone-cache', url]);
+    await run(['create-clone-cache', '--force-clone', url]);
 
     let dest =  `${this.home}/clones/git-checkout-revision/`;
     await run([
@@ -39,7 +39,7 @@ suite('checkout-revision', function() {
   test('(hg) cached -> then update', async function () {
     let alias = 'bitbucket.org/lightsofapollo/hgcache';
     let url = `https://${alias}`;
-    await run(['create-clone-cache', url]);
+    await run(['create-clone-cache', '--force-clone', url]);
 
     let dest = `${this.home}/clones/hg-checkout-revision`;
     await run([

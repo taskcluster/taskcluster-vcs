@@ -30,11 +30,13 @@ suite('checkout', function() {
     let dest = `${this.home}/clones/tc-vcs-cache`;
     await run([
       'checkout',
+      '--force-clone',
       dest,
       'https://github.com/lightsofapollo/tc-vcs-cache'
     ]);
     await run([
       'checkout',
+      '--force-clone',
       dest,
       'https://bitbucket.org/lightsofapollo/hgtesting',
     ]);
@@ -49,6 +51,7 @@ suite('checkout', function() {
     async function checkout() {
       await run([
         'checkout',
+        '--force-clone',
         dest,
         url,
         url,
@@ -69,11 +72,12 @@ suite('checkout', function() {
   test('(with cache) checkout fresh then checkout again', async function () {
     let url = 'https://github.com/lightsofapollo/tc-vcs-cache'
     let dest = `${this.home}/clones/tc-vcs-cache`;
-    await run(['create-clone-cache', url]);
+    await run(['create-clone-cache', '--force-clone', url]);
 
     async function checkout() {
       await run([
         'checkout',
+        '--force-clone',
         dest,
         url,
         url,
@@ -97,6 +101,7 @@ suite('checkout', function() {
     let dest = `${this.home}/clones/tc-vcs-cache`;
     await run([
       'checkout',
+      '--force-clone',
       dest,
       url
     ]);
@@ -112,6 +117,7 @@ suite('checkout', function() {
     let dest = `${this.home}/clones/mozharness`;
     await run([
       'checkout',
+      '--force-clone',
       dest,
       url,
       url,
@@ -128,6 +134,7 @@ suite('checkout', function() {
     let dest = `${this.home}/clones/mozharness`;
     await run([
       'checkout',
+      '--force-clone',
       dest,
       url,
       url,
@@ -144,6 +151,7 @@ suite('checkout', function() {
     let dest = `${this.home}/clones/mozharness`;
     await run([
       'checkout',
+      '--force-clone',
       dest,
       url,
       url,
@@ -160,6 +168,7 @@ suite('checkout', function() {
     let dest = `${this.home}/clones/mozharness`;
     await run([
       'checkout',
+      '--force-clone',
       dest,
       url,
       url,

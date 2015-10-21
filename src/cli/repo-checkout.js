@@ -149,10 +149,13 @@ export default async function main(config, argv) {
     };
 
     // Only attempt to use caches if the project does not already exist.
-    if (!await fs.exists(repoPath)) {
-      archiveDetails.archivePath =
-        await artifacts.downloadIfUnavailable(name, namespace, args.directory);
+    if (await fs.exists(repoPath)) {
+      stats.projects[project.name].duration += Date.now() - downloadStart;
+      return;
     }
+
+    archiveDetails.archivePath =
+      await artifacts.downloadIfUnavailable(name, namespace, args.directory);
 
     stats.projects[project.name].duration += Date.now() - downloadStart;
 
@@ -162,7 +165,18 @@ export default async function main(config, argv) {
   // Extraction of archives should *not* be done in parallel because of race
   // conditions with writing to the same directories.
   for (let archive of archivesToExtract) {
-    if (!archive.archivePath) continue;
+    if (!archive) continue;
+    if (!archive.archivePath) {
+      if (!args.force_clone) {
+        console.error(
+          `[taskcluster:error] Cached copy of '${archive.projectName}' could not be found. ` +
+          `Use '--force-clone' to perform a full clone`
+        );
+        process.exit(1);
+      }
+      continue;
+    }
+
     let extractStart = Date.now();
 
     await artifacts.extract(archive.archivePath, args.directory);
@@ -180,7 +194,7 @@ export default async function main(config, argv) {
   );
 
   if (!await fs.exists(fsPath.join(args.directory, '.repo'))) {
-    console.error(`${args.command} ran but did not generate a .repo directory`);
+    console.error(`[taskcluster-vcs:error] ${args.command} ran but did not generate a .repo directory`);
     process.exit(1);
   }
 }

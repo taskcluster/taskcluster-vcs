@@ -54,6 +54,15 @@ export default async function main(config, argv) {
     args.dest
   );
 
+
+  if (!archivePath && !args.force_clone) {
+    console.error(
+      '[taskcluster-vcs:error] Could not clone repository using cached copy. ' +
+      'Use \'--force-clone\' to perform a full clone.'
+    );
+    process.exit(1);
+  }
+
   let vcsConfig = await detect(args.url);
   let vcs = require('../vcs/' + vcsConfig.type);
 
@@ -64,14 +73,6 @@ export default async function main(config, argv) {
     await artifacts.extract(archivePath, args.dest);
     await vcs.pull(config, args.dest, args.url);
   } else {
-    if (!args.force_clone) {
-      console.error(
-        '[taskcluster-vcs:error] Could not clone repository using cached copy. ' +
-        'Use \'--force-clone\' to perform a full clone.'
-      );
-      process.exit(1);
-    }
-
     await vcs.clone(config, args.url, args.dest);
   }
 }
