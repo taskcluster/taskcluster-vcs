@@ -165,7 +165,12 @@ export default async function main(config, argv) {
   // Extraction of archives should *not* be done in parallel because of race
   // conditions with writing to the same directories.
   for (let archive of archivesToExtract) {
+    // Skip if archive does not exist.  This happens when extracted archive already
+    // exists.
     if (!archive) continue;
+    // If no archive was downloaded, processing should only continue if force-clone
+    // option was specified. This is to prevent accidentally doing full clones of repositories
+    // unless explicitly forced.
     if (!archive.archivePath) {
       if (!args.force_clone) {
         console.error(
