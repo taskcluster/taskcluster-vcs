@@ -45,6 +45,12 @@ export default async function main(config, argv) {
     `.trim()
   });
 
+  parser.addArgument(['--force-clone'], {
+    action: 'storeTrue',
+    defaultValue: false,
+    help: 'Clone from remote repository when cached copy is not available'.trim()
+  });
+
   parser.addArgument(['directory'], {
     type: (value) => {
       return fsPath.resolve(value);
@@ -85,6 +91,12 @@ export default async function main(config, argv) {
   });
 
   let args = parser.parseArgs(argv);
+  let cloneArgs = [args.baseUrl, args.directory];
+
+  if (args.force_clone) {
+    cloneArgs.unshift('--force-clone');
+  }
+
   let remoteVcsConfig = await detect(args.baseUrl);
 
   // First check if the directory exists if it does it must be a detectable vcs
@@ -96,21 +108,22 @@ export default async function main(config, argv) {
     } catch (err) {
       console.error(
         `
-          "${args.directory}" exists but is not a known vcs type \n
+          "[taskcluster-vcs:error] ${args.directory}" exists but is not a known vcs type \n
           ${err.stack}
         `
       );
       process.exit(1);
     }
+
     if (vcsConfig.type != remoteVcsConfig.type) {
       console.warn(
         '[taskcluster-vcs:warning] Local cache is not same vcs type as remote purging...'
       );
       await run(`rm -Rf ${args.directory}`);
-      await clone(config, [args.baseUrl, args.directory]);
+      await clone(config, cloneArgs);
     }
   } else {
-    await clone(config, [args.baseUrl, args.directory]);
+    await clone(config, cloneArgs);
   }
 
   let vcsConfig = await detectLocal(args.directory);

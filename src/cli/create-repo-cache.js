@@ -51,19 +51,29 @@ export default async function main(config, argv) {
     `
   });
 
+  parser.addArgument(['--force-clone'], {
+    action: 'storeTrue',
+    help: 'Clone from remote repository when cached copy is not available'.trim()
+  });
+
   // configuration for clone/update....
   let args = parser.parseArgs(argv);
   let queue = clitools.getTcQueue(args.proxy);
   let index = clitools.getTcIndex(args.proxy);
   let workspace = temp.path('tc-vcs-create-repo-cache');
   let artifacts = new Artifacts(config.repoCache, queue, index);
-
-  // Clone and update cache...
-  await repoCheckout(config, [
+  let repoCheckoutArgs = [
     workspace, args.url, args.manifest,
     '--namespace', args.namespace,
-    '--branch', args.branch
-  ]);
+    '--branch', args.branch,
+  ];
+
+  if (args.force_clone) {
+    repoCheckoutArgs.unshift('--force-clone');
+  }
+
+  // Clone and update cache...
+  await repoCheckout(config, repoCheckoutArgs);
 
   // Get a list of the projects so we can build the tars...
   let projects = await vcsRepo.list(workspace);

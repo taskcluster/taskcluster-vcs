@@ -18,7 +18,7 @@ suite('repo-checkout', function() {
   test('successful repo sync', async function () {
     let manifest = 'sources.xml';
     await run([
-      'repo-checkout', dest, url, manifest
+      'repo-checkout', '--force-clone', dest, url, manifest
     ]);
 
     let [rev] = await run(['revision', `${dest}/gittesting`]);
@@ -28,8 +28,14 @@ suite('repo-checkout', function() {
   test('(cached) repo sync and resync', async function() {
     let manifest = 'sources.xml';
     let home = this.home;
-    await run(['create-repo-cache', url, manifest]);
+    // create-repo-cache does not create a cache of the original repo that contains
+    // the source manifest so later calling repo-checkout without force-clone causes
+    // all sorts of issues
+    await run(['create-clone-cache', '--force-clone', url]);
+    await run(['create-repo-cache', '--force-clone', url, manifest]);
 
+
+    let force = false
     async function checkout() {
       await run(['repo-checkout', dest, url, manifest]);
       let statsUrl = fsPath.join(dest, '.repo', '.tc-vcs-cache-stats.json');

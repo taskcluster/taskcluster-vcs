@@ -18,7 +18,7 @@ suite('create repo cache', function() {
 
   test('create cache', async function() {
     let source = 'bitbucket.org/lightsofapollo/gittesting/master';
-    await run(['create-repo-cache', url, 'sources.xml']);
+    await run(['create-repo-cache', '--force-clone', url, 'sources.xml']);
     assert(fs.exists(`${this.home}/repo/sources/${source}.tar.gz`));
   });
 
@@ -32,6 +32,7 @@ suite('create repo cache', function() {
     let taskId = await createTask();
     await run([
       'create-repo-cache',
+      '--force-clone',
       '--upload',
       '--namespace', namespace,
       '--task-id', taskId,
