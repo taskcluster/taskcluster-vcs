@@ -30,7 +30,14 @@ async function main(argv) {
         'https://git.mozilla.org/build/tooltool.git',
         'https://git.mozilla.org/external/google/gerrit/git-repo.git',
         'https://hg.mozilla.org/projects/alder',
-        'https://hg.mozilla.org/projects/alder/'
+        'https://hg.mozilla.org/projects/alder/',
+        'http://hg.mozilla.org/releases/mozilla-b2g34_v2_1',
+        'http://hg.mozilla.org/releases/mozilla-b2g34_v2_1/',
+        'http://hg.mozilla.org/releases/mozilla-b2g34_v2_2r',
+        'http://hg.mozilla.org/releases/mozilla-b2g34_v2_2r/',
+        'http://hg.mozilla.org/releases/mozilla-b2g34_v2_2r/',
+        'http://hg.mozilla.org/releases/mozilla-b2g44_v2_5',
+        'http://hg.mozilla.org/releases/mozilla-b2g44_v2_5/'
     ];
 
 
