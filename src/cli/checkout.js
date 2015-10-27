@@ -106,6 +106,7 @@ export default async function main(config, argv) {
     try {
       vcsConfig = await detectLocal(args.directory);
     } catch (err) {
+      console.log(err.stack || err);
       console.error(
         `
           "[taskcluster-vcs:error] ${args.directory}" exists but is not a known vcs type \n

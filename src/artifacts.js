@@ -54,7 +54,10 @@ export default class Artifacts {
       task = await this.index.findTask(namespace);
     } catch (e) {
       // 404 will throw so validate before returning null...
-      if (e.code && e.code != 404) throw e;
+      if (e.code && e.code != 404){
+        console.log(e.stack || e);
+        throw e;
+      } 
       console.error(
         `[taskcluster-vcs:warning] No task indexed for namespace "${namespace}"`
       );
@@ -114,6 +117,7 @@ export default class Artifacts {
       await run(cmd, { retries: 20 });
     } catch(e) {
       console.log('[taskcluster-vcs:error] Error when downloading from remote url');
+      console.log(e.stack || e);
       throw e;
     }
   }
@@ -143,6 +147,7 @@ export default class Artifacts {
       await run(cmd);
     } catch(e) {
       console.error('[taskcluster-vcs:error] Error when extracting archive');
+      console.log(e.stack || e);
       throw e;
     }
 

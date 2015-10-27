@@ -50,6 +50,7 @@ function help() {
 
 function cli(name, config, argv) {
   require(name)(config, argv).catch((err) => {
+    console.log(err.stack || err);
     if (err) {
       setTimeout(() => {
         throw err;
