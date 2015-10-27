@@ -70,7 +70,7 @@ async function main(argv) {
               raiseError: true,
               verbose: true,
               buffer: false,
-          }).catch((err) => { errors.push(err) });
+          }).catch(err => { errors.push(err) });
     }));
 
     for (var error of errors) {

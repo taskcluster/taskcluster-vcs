@@ -61,6 +61,7 @@ export async function checkoutRevision(config, cwd, repository, ref, rev) {
   } catch (err) {
     // if ref == rev, we assume that's the revision number
     if (ref !== rev) {
+      console.log(err.stack || err);
       throw err;
     }
   }
