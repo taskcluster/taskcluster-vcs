@@ -8,7 +8,10 @@
     "tc-vcs": "./build/bin/tc-vcs.js"
   },
   "scripts": {
-    "prepublish": "6to5 -s -e src --out-dir build",
+    "id": "(git rev-parse HEAD || hg id || echo '---') > .gitinfo",
+    "compile": "npm run id && 6to5 -s -e src --out-dir build",
+    "prepublish": "npm run compile",
+    "pretest": "npm run compile",
     "test": "mocha $(find test -name '*_test.js')",
     "test-no-upload": "mocha $(find test -name '*_test.js') --grep '@taskcluster' --invert"
   },
