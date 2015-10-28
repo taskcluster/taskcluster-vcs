@@ -40,7 +40,13 @@ async function detectGit(url) {
 
 async function detectHg(url) {
   let location = urlJoin(url, '?cmd=lookup&key=0');
+
+  console.log(`[taskcluster-vcs] detectHg: start fetching head of ${url}`);
+
   let res = await request.head(location).end();
+
+  console.log(`[taskcluster-vcs] detectHg: end fetching head of ${url}`);
+
   if (res.error) throw res.error;
   if (
     // we must have a content type
