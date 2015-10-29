@@ -1,5 +1,7 @@
+import { Scheduler } from 'taskcluster-client';
+
 import run from './run';
-import { generateCloneTaskDefinition, generateRepoCacheTaskDefinition } from './task';
+import { generateCacheGraph, generateCloneTaskDefinition, generateRepoCacheTaskDefinition } from './task';
 
 // import cache config
 
@@ -59,30 +61,24 @@ async function main(argv) {
         ['g_emulator_url', 'emulator-l.xml']
     ];
 
-
+    var scheduler = new Scheduler();
     var tasks = [];
 
     for (var url of clones) {
-        var task = generateCloneTaskDefinition(url);
-        tasks.push(`echo '${task}' | taskcluster run-task --verbose`);
+        tasks.push(generateCloneTaskDefinition(url));
     }
+
     for (var emulator of emulators) {
-        var task = generateRepoCacheTaskDefinition(emulator[1], emulator[0]);
-        tasks.push(`echo '${task}' | taskcluster run-task --verbose`);
+        tasks.push(generateRepoCacheTaskDefinition(emulator[1], emulator[0]));
     }
 
-    let errors = [];
-    await Promise.all(tasks.map((task) => {
-          return run(task, {
-              raiseError: true,
-              verbose: true,
-              buffer: false,
-          }).catch(err => { errors.push(err) });
-    }));
-
-    for (var error of errors) {
-        console.log(error);
-    }
+    let {graphId, graph} = generateCacheGraph(tasks);
+    console.log(`Creating cache graph '${graphId}'`);
+    await scheduler.createTaskGraph(graphId, graph);
 };
 
-main(process.argv);
+main(process.argv).catch((err) => {
+  console.log(JSON.stringify(err));
+  process.exit(1);
+});
+

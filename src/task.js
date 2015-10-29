@@ -1,3 +1,5 @@
+import slugid from 'slugid';
+
 // To configure, define in your environment:
 //   OWNER_EMAIL
 //   TASKCLUSTER_ACCESS_TOKEN
@@ -5,6 +7,29 @@
 //
 // Notes:
 // * Only supports a workerType with permacreds at this time.
+
+export function generateCacheGraph(tasks) {
+  let graphId = slugid.nice();
+
+  let graph = {
+      metadata: {
+        name:         'Clone Cache Graph',
+        description:  'Creates cached copies of repositories to use with taskcluster-vcs',
+        owner:        process.env.OWNER_EMAIL,
+        source:       'https://github.com/taskcluster/taskcluster-vcs'
+      },
+      scopes: ['queue:*', 'index:*']
+  }
+
+  graph.tasks = tasks.map((task) => {
+    return {
+      taskId: slugid.nice(),
+      task: task
+    }
+  })
+
+  return {graphId, graph};
+}
 
 export function generateCloneTaskDefinition(repo) {
 
@@ -30,14 +55,13 @@ export function generateCloneTaskDefinition(repo) {
         }
       },
       metadata: {
-        name: 'cache',
+        name: `cache ${repo}`,
         description: params.join(' '),
         owner: process.env.OWNER_EMAIL,
         source: 'https://github.com/taskcluster/taskcluster-vcs'
       }
     };
 
-    var task = JSON.stringify(task, null, 2);
     return task;
 
 }
@@ -51,7 +75,7 @@ export function generateRepoCacheTaskDefinition(emulator, type) {
     } else if (type === 'g_emulator_url') {
         repo = "https://raw.githubusercontent.com/mozilla-b2g/b2g-manifest/master/" + emulator;
     } else {
-        throw "Type ${type} is invalid."
+        throw `Type ${type} is invalid.`
     }
     var params = ['create-repo-cache', '--upload', '--proxy', 'https://git.mozilla.org/b2g/B2G', repo]
 
@@ -73,13 +97,12 @@ export function generateRepoCacheTaskDefinition(emulator, type) {
         }
       },
       metadata: {
-        name: 'cache',
+        name: `cache ${emulator}`,
         description: params.join(' '),
         owner: process.env.OWNER_EMAIL,
         source: 'https://github.com/taskcluster/taskcluster-vcs'
       }
     };
 
-    var task = JSON.stringify(task, null, 2);
     return task;
 }
