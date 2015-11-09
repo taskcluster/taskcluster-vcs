@@ -35,7 +35,7 @@ export function generateCloneTaskDefinition(repo) {
 
     var date = new Date();
     var deadline = new Date(date.valueOf() + 4 * (3600 * 1000));
-    var params = ['create-clone-cache', '--upload', '--proxy', repo]
+    var params = ['create-clone-cache', '--force-clone', '--upload', '--proxy', repo]
 
     var task = {
       provisionerId: 'aws-provisioner-v1',
@@ -44,7 +44,7 @@ export function generateCloneTaskDefinition(repo) {
       deadline: deadline,
       scopes: ['queue:create-artifact:*', 'index:insert-task:tc-vcs.v1.clones.*'],
       payload: {
-        image: 'taskcluster/taskcluster-vcs:2.3.14',
+        image: 'taskcluster/taskcluster-vcs:2.3.15',
         command: params,
         maxRunTime: 3600,
         features: {
@@ -77,7 +77,7 @@ export function generateRepoCacheTaskDefinition(emulator, type) {
     } else {
         throw `Type ${type} is invalid.`
     }
-    var params = ['create-repo-cache', '--upload', '--proxy', 'https://git.mozilla.org/b2g/B2G', repo]
+    var params = ['create-repo-cache', '--force-clone', '--upload', '--proxy', 'https://git.mozilla.org/b2g/B2G', repo]
 
     var task = {
       provisionerId: 'aws-provisioner-v1',
@@ -86,7 +86,7 @@ export function generateRepoCacheTaskDefinition(emulator, type) {
       deadline: deadline,
       scopes: ['queue:*', 'index:*'],
       payload: {
-        image: 'taskcluster/taskcluster-vcs:2.3.14',
+        image: 'taskcluster/taskcluster-vcs:2.3.15',
         command: params,
         maxRunTime: 3600,
         features: {
