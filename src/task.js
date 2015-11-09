@@ -42,7 +42,7 @@ export function generateCloneTaskDefinition(repo) {
       workerType: 'gaia',
       created: date,
       deadline: deadline,
-      scopes: ['queue:*', 'index:*'],
+      scopes: ['queue:create-artifact:*', 'index:insert-task:tc-vcs.v1.clones.*'],
       payload: {
         image: 'taskcluster/taskcluster-vcs:2.3.14',
         command: params,
