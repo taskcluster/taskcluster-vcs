@@ -84,7 +84,7 @@ export function generateRepoCacheTaskDefinition(emulator, type) {
       workerType: 'gaia',
       created: date,
       deadline: deadline,
-      scopes: ['queue:*', 'index:*'],
+      scopes: ['queue:create-artifact:*', 'index:insert-task:tc-vcs.v1.repo-project.*'],
       payload: {
         image: 'taskcluster/taskcluster-vcs:2.3.14',
         command: params,
