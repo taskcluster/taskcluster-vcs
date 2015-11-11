@@ -40,9 +40,9 @@ async function main(argv) {
         'https://hg.mozilla.org/projects/alder/',
         'http://hg.mozilla.org/releases/mozilla-b2g34_v2_1',
         'http://hg.mozilla.org/releases/mozilla-b2g34_v2_1/',
-        'http://hg.mozilla.org/releases/mozilla-b2g34_v2_2r',
-        'http://hg.mozilla.org/releases/mozilla-b2g34_v2_2r/',
-        'http://hg.mozilla.org/releases/mozilla-b2g34_v2_2r/',
+        'http://hg.mozilla.org/releases/mozilla-b2g37_v2_2r',
+        'http://hg.mozilla.org/releases/mozilla-b2g37_v2_2r/',
+        'http://hg.mozilla.org/releases/mozilla-b2g37_v2_2r/',
         'http://hg.mozilla.org/releases/mozilla-b2g44_v2_5',
         'http://hg.mozilla.org/releases/mozilla-b2g44_v2_5/'
     ];
