@@ -69,7 +69,16 @@ export default class Artifacts {
     );
 
     let res = await request.head(artifactUrl).end();
-    if (res.status === 404) {
+
+    // If URL is a redirect, follow redirect and see if artifact exists
+    if (res.status === 303) {
+      let redirectRes = await request.get(artifactUrl).redirects(0).end();
+      res = await request.head(redirectRes.headers.location).end();
+    }
+
+    // Either the artifact could not exist (404) or an artifact was not uploaded
+    // entirely resulting in a 403.
+    if ([403, 404].includes(res.status)) {
       console.error(
         `[taskcluster-vcs:error] Artifact "${artifact}" not found ` +
         `for task ID ${task.taskId}.  This could be caused by the artifact ` +
