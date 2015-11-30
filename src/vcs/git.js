@@ -70,6 +70,9 @@ export async function checkoutRevision(config, cwd, repository, ref, rev) {
 
   // Fixes issue with local master checkout
   await run(`${config.git} merge ${remote}/${ref}`, { cwd });
+
+  // Force a repack to avoid changes when tarring up later
+  await run(`${config.git} repack -d -l`, { cwd });
 }
 
 /**

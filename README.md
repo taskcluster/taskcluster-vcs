@@ -5,3 +5,22 @@
 [![Build Status](https://travis-ci.org/taskcluster/taskcluster-vcs.svg?branch=master)](https://travis-ci.org/taskcluster/taskcluster-vcs)
 
 [Read the docs](http://tc-vcs.readthedocs.org/en/latest/)
+
+# Deploying new Docker images
+
+
+```
+# Edit `Dockerfile` and `src/task.js` to update the version number.
+docker bulid -t taskcluster/taskcluster-vcs:$REVISION .
+docker login
+docker push taskcluster/taskcluster-vcs:$REVISION
+
+```
+
+# Deploying new versions on npm
+
+```
+# Edit package.json to update the revision
+npm login
+npm publish
+```
