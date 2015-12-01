@@ -44,8 +44,10 @@ async function main(argv) {
         'https://hg.mozilla.org/releases/mozilla-b2g37_v2_2r/',
         'https://hg.mozilla.org/releases/mozilla-b2g37_v2_2r/',
         'https://hg.mozilla.org/releases/mozilla-b2g44_v2_5',
-        'https://hg.mozilla.org/releases/mozilla-b2g44_v2_5/'
-    ];
+        'https://hg.mozilla.org/releases/mozilla-b2g44_v2_5/',
+        'https://hg.mozilla.org/releases/b2g-ota',
+        'https://hg.mozilla.org/releases/b2g-ota/'
+];
 
 
     var emulators = [
