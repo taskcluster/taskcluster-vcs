@@ -19,8 +19,13 @@ docker push taskcluster/taskcluster-vcs:$VERSION
 
 # Deploying new versions on npm
 
+Consider running `npm update` first and testing the result.
+
 ```
 # Edit package.json to update the revision
+npm shrinkwrap
 npm login
 npm publish
 ```
+
+Don't forget to commit and push the changes.
