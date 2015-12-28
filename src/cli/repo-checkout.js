@@ -174,7 +174,7 @@ export default async function main(config, argv) {
     if (!archive.archivePath) {
       if (!args.force_clone) {
         console.error(
-          `[taskcluster:error] Cached copy of '${archive.projectName}' could not be found. ` +
+          `[taskcluster-vcs:error] Cached copy of '${archive.projectName}' could not be found. ` +
           `Use '--force-clone' to perform a full clone`
         );
         process.exit(1);

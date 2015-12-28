@@ -97,6 +97,8 @@ export default async function main(config, argv) {
     cloneArgs.unshift('--force-clone');
   }
 
+  cloneArgs.unshift(`--namespace=${args.namespace}`);
+
   let remoteVcsConfig = await detect(args.baseUrl);
 
   // First check if the directory exists if it does it must be a detectable vcs
