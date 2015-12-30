@@ -57,6 +57,8 @@ async function main(argv) {
         ['emulator_url', 'flame'],
         ['emulator_url', 'flame-kk'],
         ['emulator_url', 'nexus-4'],
+        ['emulator_url', 'nexus-4-kk'],
+        ['emulator_url', 'nexus-5-l'],
         ['emulator_url', 'emulator-l'],
         ['emulator_url', 'dolphin'],
         ['emulator_url', 'dolphin-512'],
