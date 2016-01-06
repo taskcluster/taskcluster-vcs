@@ -1,8 +1,13 @@
+import assert from 'assert';
+import fs from 'mz/fs';
+import mkdirp from 'mkdirp';
+import slugid from 'slugid';
+import { Index } from 'taskcluster-client';
+
+import createTask from './taskcluster';
+import hash from '../../src/hash';
 import rm from './rm';
 import run from './run';
-import fs from 'mz/fs';
-import assert from 'assert';
-import mkdirp from 'mkdirp';
 
 suite('checkout', function() {
   test('checkout in directory which is not controlled by a vcs', async function() {
@@ -179,6 +184,68 @@ suite('checkout', function() {
       'eafd3e166af5a77d4138790ae43a4d4f1a043d2a'
     );
   });
+
+  test('unindexed repo cannot be checkedout without force clone', async function () {
+    // Repo should always be around as long as a CLI client is available for github,
+    // should be safe for this test.
+    let url = 'https://github.com/github/hub';
+    let dest = `${this.home}/clones/github_hub`;
+    try {
+      await run([
+        'checkout',
+        dest,
+        url,
+        url,
+        '9999'
+      ]);
+    } catch(e) {
+      assert(
+        e.message.includes('[taskcluster-vcs:warning] No task indexed'),
+        'Error should indicate that the task is not indexed'
+      );
+      return;
+    }
+
+    throw new Error('Error was not raised when repository has not been indexed');
+  });
+
+  test('@taskcluster cannot checkout repo that is indexed but no artifact present', async function() {
+    let index = new Index();
+    let alias = 'github.com/github/hub'
+    let dest = `${this.home}/hg`;
+    let namespace = `public.test.taskcluster-vcs-garbage.${slugid.v4()}`;
+    let taskId = await createTask();
+
+    let indexOptions = {
+      taskId: taskId,
+      rank: 1,
+      data: {},
+      expires: new Date(Date.now() + 60 * 1000)
+    };
+
+    await index.insertTask(`${namespace}.${hash(alias)}`, indexOptions);
+
+    try {
+      await run([
+        'checkout',
+        `--namespace=${namespace}`,
+        dest,
+        'https://github.com/github/hub',
+        'https://github.com/github/hub',
+        '9999'
+      ]);
+    } catch(e) {
+      let expected = `Artifact "public/github.com/github/hub.tar.gz" not ` +
+                     `found for task ID ${taskId}`;
+      assert(
+        e.message.includes(expected),
+        'Error message does not indicate that artifact could not be found'
+      );
+      return;
+    }
+
+    throw new Error('Error was not raised when artifact could not be found for indexed repo');
+});
 });
 
 

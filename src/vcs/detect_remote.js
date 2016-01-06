@@ -2,10 +2,33 @@ import URL from 'url';
 import request from 'superagent-promise';
 import urlJoin from 'url-join';
 
-/**
--> <url>?cmd=lookup&key=0 (if this is hg content-type will contain "mercurial")
-->
-*/
+const BITBUCKET_API_PREFIX = 'https://api.bitbucket.org/1.0/repositories';
+
+/*
+ * Determine if a given URL is a bitbucket url
+ */
+function isBitbucketRepo(url) {
+  return URL.parse(url).hostname === 'bitbucket.org';
+}
+
+/*
+ * Assert that a given url for a bitbucket repo is the expected VCS type.
+ */
+async function assertBitbucketRepoType(url, expectedType) {
+  let parsedUrl = URL.parse(url);
+  let apiUrl =  urlJoin(BITBUCKET_API_PREFIX, parsedUrl.path);
+  // Requesting the repository using the bitbucket API returns back a JSON payload
+  // containing the scm type (either hg or git)
+  let res = await request.get(apiUrl).end();
+
+  if (res.error) throw res.error;
+
+  if (res.body.scm !== expectedType) {
+    throw new Error(`${url} is not a ${expectedType} url`);
+  }
+
+  return {type: expectedType, url: url};
+}
 
 /**
 Attempt to determine if this url is a git url.
@@ -15,6 +38,12 @@ See https://github.com/git/git/blob/398dd4bd039680ba98497fbedffa415a43583c16/Doc
 For the exact logic used here...
 */
 async function detectGit(url) {
+  // If repository is a bitbucket hosted repo, rely on SCM json information for
+  // determining repository type.  content_type cannot be relied upon.
+  if (isBitbucketRepo(url)) {
+    return await assertBitbucketRepoType(url, 'git');
+  }
+
   let location = urlJoin(url, '/info/refs?service=git-upload-pack');
 
   // XXX: get is used so we correctly follow redirects...
@@ -39,6 +68,12 @@ async function detectGit(url) {
 }
 
 async function detectHg(url) {
+  // If repository is a bitbucket hosted repo, rely on SCM json information for
+  // determining repository type.  content_type cannot be relied upon.
+  if (isBitbucketRepo(url)) {
+    return await assertBitbucketRepoType(url, 'hg');
+  }
+
   let location = urlJoin(url, '?cmd=lookup&key=0');
 
   console.log(`[taskcluster-vcs] detectHg: start fetching head of ${url}`);
@@ -48,12 +83,10 @@ async function detectHg(url) {
   console.log(`[taskcluster-vcs] detectHg: end fetching head of ${url}`);
 
   if (res.error) throw res.error;
-  if (
-    // we must have a content type
-    res.headers['content-type'] &&
-    // and it must contain mercurial
-    res.headers['content-type'].indexOf('mercurial') !== -1
-  ) {
+  let contentType = res.headers['content-type'];
+
+  // we must have a content type and it must contain mercurial
+  if (contentType && contentType.includes('mercurial')) {
     return { type: 'hg', url: location };
   }
   throw new Error(url + ' is not a hg url');
