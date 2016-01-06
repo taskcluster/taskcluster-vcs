@@ -28,6 +28,8 @@ Commands:
   checkout-revision : Checkout particular revision in repository.
                       DEPRECATED: use checkout instead.
 
+  moz-cache: refresh mozilla-specific caches
+
 Configuration (yaml file):
 
 To provide a greater degree of flexibility there is the option of passing a
