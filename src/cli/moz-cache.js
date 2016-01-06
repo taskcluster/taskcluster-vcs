@@ -92,8 +92,8 @@ export default async function main(config, argv) {
     console.log(`Creating cache graph '${graphId}'`);
     console.log(JSON.stringify(graph));
 
-    //let result = await scheduler.createTaskGraph(graphId, graph);
-    //console.log(JSON.stringify(result));
+    let result = await scheduler.createTaskGraph(graphId, graph);
+    console.log(JSON.stringify(result));
 }
 
 
