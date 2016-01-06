@@ -1,5 +1,6 @@
 import { Scheduler } from 'taskcluster-client';
 import slugid from 'slugid';
+import createHash from '../hash';
 
 /*
  * This script is meant to be invoked as:
@@ -91,8 +92,8 @@ export default async function main(config, argv) {
     console.log(`Creating cache graph '${graphId}'`);
     console.log(JSON.stringify(graph));
 
-    let result = await scheduler.createTaskGraph(graphId, graph);
-    console.log(JSON.stringify(result));
+    //let result = await scheduler.createTaskGraph(graphId, graph);
+    //console.log(JSON.stringify(result));
 }
 
 
@@ -178,6 +179,7 @@ function generateRepoCacheTaskDefinition(emulator, type) {
     var date = new Date();
     var deadline = setDeadline(new Date(date.getTime()), 4);
     var repo = '';
+    var B2GUrl = 'https://git.mozilla.org/b2g/B2G';
 
     if (type === 'emulator_url') {
         repo = ["http://hg.mozilla.org/mozilla-central/raw-file/default/b2g/config", emulator, "sources.xml"].join('/');
@@ -186,7 +188,11 @@ function generateRepoCacheTaskDefinition(emulator, type) {
     } else {
         throw `Type ${type} is invalid.`
     }
-    var params = ['create-repo-cache', '--force-clone', '--upload', '--proxy', 'https://git.mozilla.org/b2g/B2G', repo]
+    var params = ['create-repo-cache', '--force-clone', '--upload', '--proxy', B2GUrl, repo]
+    // Use a hash that is unique enough to not overwrite other repos that are cached
+    // This hash is used primarily for looking up the parent task that created
+    // 'repo' caches and indexed them.
+    var indexHash = createHash(`repo-cache-${B2GUrl}-${emulator}`);
 
     var task = {
       provisionerId: 'aws-provisioner-v1',
@@ -194,6 +200,7 @@ function generateRepoCacheTaskDefinition(emulator, type) {
       created: date,
       deadline: deadline,
       scopes: ['queue:create-artifact:*', 'index:insert-task:tc-vcs.v1.repo-project.*'],
+      routes: [`index.tc-vcs.v1.repo-project.${indexHash}`],
       payload: {
         image: 'taskcluster/taskcluster-vcs:2.3.22',
         command: params,
