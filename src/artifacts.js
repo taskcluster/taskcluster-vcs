@@ -52,6 +52,11 @@ export default class Artifacts {
     let task;
     try {
       task = await this.index.findTask(namespace);
+      if (task.message && task.message === 'Indexed task not found') {
+        let error = new Error(task.message)
+        error.code = 404;
+        throw error;
+      }
     } catch (e) {
       // 404 will throw so validate before returning null...
       if (e.code && e.code != 404){
