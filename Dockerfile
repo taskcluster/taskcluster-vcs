@@ -1,4 +1,4 @@
-FROM node:latest
+FROM node:0.12.4
 
 # Repo is unhappy unless we configure git...
 RUN git config --global user.email "taskcluster-vcs@example.nomail" && \
