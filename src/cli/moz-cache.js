@@ -148,7 +148,7 @@ function generateCloneTaskDefinition(repo) {
       deadline: deadline,
       scopes: ['queue:create-artifact:*', 'index:insert-task:tc-vcs.v1.clones.*'],
       payload: {
-        image: 'taskcluster/taskcluster-vcs:2.3.22',
+        image: 'taskcluster/taskcluster-vcs:2.3.25',
         command: params,
         maxRunTime: 3600,
         features: {
@@ -197,7 +197,7 @@ function generateRepoCacheTaskDefinition(emulator, type) {
       scopes: ['queue:create-artifact:*', 'index:insert-task:tc-vcs.v1.repo-project.*'],
       routes: [`index.tc-vcs.v1.repo-project.${indexHash}`],
       payload: {
-        image: 'taskcluster/taskcluster-vcs:2.3.22',
+        image: 'taskcluster/taskcluster-vcs:2.3.25',
         command: params,
         maxRunTime: 3600,
         features: {
