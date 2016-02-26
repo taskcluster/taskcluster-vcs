@@ -66,6 +66,8 @@ export default async function main(config, argv) {
         ['emulator_url', 'flame'],
         ['emulator_url', 'flame-kk'],
         ['emulator_url', 'nexus-4'],
+        ['emulator_url', 'nexus-4-kk'],
+        ['emulator_url', 'nexus-5-l'],
         ['emulator_url', 'emulator-l'],
         ['emulator_url', 'dolphin']
     ];
