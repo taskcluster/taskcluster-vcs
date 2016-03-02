@@ -45,6 +45,8 @@ export default async function main(config, argv) {
         'https://git.mozilla.org/external/google/gerrit/git-repo.git',
         'https://hg.mozilla.org/projects/alder',
         'https://hg.mozilla.org/projects/alder/',
+        'https://hg.mozilla.org/projects/pine',
+        'https://hg.mozilla.org/projects/pine/',
         'https://hg.mozilla.org/releases/mozilla-b2g34_v2_1',
         'https://hg.mozilla.org/releases/mozilla-b2g34_v2_1/',
         'https://hg.mozilla.org/releases/mozilla-b2g37_v2_2r',
