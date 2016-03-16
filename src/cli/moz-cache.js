@@ -203,7 +203,10 @@ function generateRepoCacheTaskDefinition(emulator, type) {
       scopes: ['queue:create-artifact:*', 'index:insert-task:tc-vcs.v1.repo-project.*'],
       routes: [`index.tc-vcs.v1.repo-project.${indexHash}`],
       payload: {
-        image: 'taskcluster/taskcluster-vcs:2.3.28',
+        // TODO (garndt): Bug here with cloning android repos that happened sometime 
+        // between 2.3.24 and 2.3.29.  Since we are in the process of disabling these
+        // jobs, putting this on a known good version for the time being should be sufficient.
+        image: 'taskcluster/taskcluster-vcs:2.3.24',
         command: params,
         maxRunTime: 3600,
         features: {
