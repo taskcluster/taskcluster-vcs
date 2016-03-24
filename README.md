@@ -29,3 +29,7 @@ npm publish
 ```
 
 Don't forget to commit and push the changes.
+
+# Post-Deployment Verification
+
+After publishing a new version to npm and deploying a new docker image with that version, the image and version can be tested by duplicating the tc-vcs TaskCluster hook and replacing the image version number with the newly created version.  Run the task and ensure the tasks that it schedules complete successfully.  At a minimum tasks for hg, git, and android repo clones should be tested.
