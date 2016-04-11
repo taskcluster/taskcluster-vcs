@@ -20,6 +20,8 @@ export default async function main(config, argv) {
         'https://hg.mozilla.org/build/tools',
         'https://hg.mozilla.org/mozilla-central',
         'https://hg.mozilla.org/mozilla-central/',
+        'http://hg.mozilla.org/releases/mozilla-aurora/',
+        'http://hg.mozilla.org/releases/mozilla-aurora',
         'https://hg.mozilla.org/integration/b2g-inbound/',
         'https://hg.mozilla.org/integration/b2g-inbound',
         'https://hg.mozilla.org/integration/mozilla-inbound',
@@ -154,7 +156,7 @@ function generateCloneTaskDefinition(repo) {
       deadline: deadline,
       scopes: ['queue:create-artifact:*', 'index:insert-task:tc-vcs.v1.clones.*'],
       payload: {
-        image: 'taskcluster/taskcluster-vcs:2.3.28',
+        image: 'taskcluster/taskcluster-vcs:2.3.30',
         command: params,
         maxRunTime: 3600,
         features: {
@@ -203,7 +205,7 @@ function generateRepoCacheTaskDefinition(emulator, type) {
       scopes: ['queue:create-artifact:*', 'index:insert-task:tc-vcs.v1.repo-project.*'],
       routes: [`index.tc-vcs.v1.repo-project.${indexHash}`],
       payload: {
-        // TODO (garndt): Bug here with cloning android repos that happened sometime 
+        // TODO (garndt): Bug here with cloning android repos that happened sometime
         // between 2.3.24 and 2.3.29.  Since we are in the process of disabling these
         // jobs, putting this on a known good version for the time being should be sufficient.
         image: 'taskcluster/taskcluster-vcs:2.3.24',
