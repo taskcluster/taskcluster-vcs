@@ -49,6 +49,17 @@ function help() {
 }
 
 function cli(name, config, argv) {
+  let version = require('../../package.json').version;
+  let commit = '---';
+  let commitFile = fsPath.join(__dirname, '../../.gitinfo');
+  if (fs.existsSync(commitFile)) {
+    try {
+      commit = fs.readFileSync(commitFile).toString().trim().slice(0,7);
+    } catch (err) { }
+  }
+  // Write to standard error so that the unit tests can pass.  They default to
+  // reading the stdandard output of this program.
+  process.stderr.write('taskcluster-vcs ' + version + ' (' + commit + ')\n');
   require(name)(config, argv).catch((err) => {
     console.log(err.stack || err);
     if (err) {
