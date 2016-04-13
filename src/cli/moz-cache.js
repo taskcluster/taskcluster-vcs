@@ -57,7 +57,9 @@ export default async function main(config, argv) {
         'https://hg.mozilla.org/releases/mozilla-b2g44_v2_5',
         'https://hg.mozilla.org/releases/mozilla-b2g44_v2_5/',
         'https://hg.mozilla.org/releases/b2g-ota/',
-        'https://hg.mozilla.org/releases/b2g-ota'
+        'https://hg.mozilla.org/releases/b2g-ota',
+        'https://github.com/mozilla/fennec-distribution-sample',
+        'https://github.com/mozilla/fennec-distribution-sample/'
     ];
 
 
@@ -156,7 +158,7 @@ function generateCloneTaskDefinition(repo) {
       deadline: deadline,
       scopes: ['queue:create-artifact:*', 'index:insert-task:tc-vcs.v1.clones.*'],
       payload: {
-        image: 'taskcluster/taskcluster-vcs:2.3.31',
+        image: 'taskcluster/taskcluster-vcs:2.3.32',
         command: params,
         maxRunTime: 3600,
         features: {
