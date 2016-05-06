@@ -153,12 +153,12 @@ function generateCloneTaskDefinition(repo) {
 
     var task = {
       provisionerId: 'aws-provisioner-v1',
-      workerType: 'gaia',
+      workerType: 'tcvcs-cache',
       created: date,
       deadline: deadline,
       scopes: ['queue:create-artifact:*', 'index:insert-task:tc-vcs.v1.clones.*'],
       payload: {
-        image: 'taskcluster/taskcluster-vcs:2.3.32',
+        image: 'taskcluster/taskcluster-vcs:2.3.33',
         command: params,
         maxRunTime: 3600,
         features: {
