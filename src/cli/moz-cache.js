@@ -212,7 +212,7 @@ function generateRepoCacheTaskDefinition(emulator, type) {
         // jobs, putting this on a known good version for the time being should be sufficient.
         image: 'taskcluster/taskcluster-vcs:2.3.24',
         command: params,
-        maxRunTime: 3600,
+        maxRunTime: 7200,
         features: {
           taskclusterProxy: true
         },
