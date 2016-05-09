@@ -20,8 +20,8 @@ export default async function main(config, argv) {
         'https://hg.mozilla.org/build/tools',
         'https://hg.mozilla.org/mozilla-central',
         'https://hg.mozilla.org/mozilla-central/',
-        'http://hg.mozilla.org/releases/mozilla-aurora/',
-        'http://hg.mozilla.org/releases/mozilla-aurora',
+        'https://hg.mozilla.org/releases/mozilla-aurora/',
+        'https://hg.mozilla.org/releases/mozilla-aurora',
         'https://hg.mozilla.org/integration/b2g-inbound/',
         'https://hg.mozilla.org/integration/b2g-inbound',
         'https://hg.mozilla.org/integration/mozilla-inbound',
@@ -170,7 +170,7 @@ function generateCloneTaskDefinition(repo) {
       deadline: deadline,
       scopes: ['queue:create-artifact:*', 'index:insert-task:tc-vcs.v1.clones.*'],
       payload: {
-        image: 'taskcluster/taskcluster-vcs:2.3.34',
+        image: 'taskcluster/taskcluster-vcs:2.3.35',
         command: params,
         maxRunTime: 3600,
         features: {
@@ -199,7 +199,7 @@ function generateRepoCacheTaskDefinition(emulator, type) {
     var B2GUrl = 'https://git.mozilla.org/b2g/B2G';
 
     if (type === 'emulator_url') {
-        repo = ["http://hg.mozilla.org/mozilla-central/raw-file/default/b2g/config", emulator, "sources.xml"].join('/');
+        repo = ["https://hg.mozilla.org/mozilla-central/raw-file/default/b2g/config", emulator, "sources.xml"].join('/');
     } else if (type === 'g_emulator_url') {
         repo = ["https://raw.githubusercontent.com/mozilla-b2g/b2g-manifest/master", emulator].join('/');
     } else {
