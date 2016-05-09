@@ -55,6 +55,8 @@ export default async function main(config, argv) {
         'https://hg.mozilla.org/projects/cedar/',
         'https://hg.mozilla.org/projects/elm',
         'https://hg.mozilla.org/projects/elm/',
+        'https://hg.mozilla.org/projects/oak',
+        'https://hg.mozilla.org/projects/oak/',
         'https://hg.mozilla.org/projects/jamun',
         'https://hg.mozilla.org/projects/jamun/',
         'https://hg.mozilla.org/projects/date',
@@ -168,7 +170,7 @@ function generateCloneTaskDefinition(repo) {
       deadline: deadline,
       scopes: ['queue:create-artifact:*', 'index:insert-task:tc-vcs.v1.clones.*'],
       payload: {
-        image: 'taskcluster/taskcluster-vcs:2.3.33',
+        image: 'taskcluster/taskcluster-vcs:2.3.34',
         command: params,
         maxRunTime: 3600,
         features: {
