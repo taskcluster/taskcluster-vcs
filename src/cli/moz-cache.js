@@ -180,7 +180,7 @@ function generateCloneTaskDefinition(repo) {
       deadline: deadline,
       scopes: ['queue:create-artifact:*', 'index:insert-task:tc-vcs.v1.clones.*'],
       payload: {
-        image: 'taskcluster/taskcluster-vcs:2.3.35',
+        image: 'taskcluster/taskcluster-vcs:2.3.36',
         command: params,
         maxRunTime: 3600,
         features: {
