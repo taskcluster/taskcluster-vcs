@@ -28,6 +28,8 @@ export default async function main(config, argv) {
         'https://hg.mozilla.org/releases/mozilla-release',
         'https://hg.mozilla.org/releases/mozilla-esr45/',
         'https://hg.mozilla.org/releases/mozilla-esr45',
+        'https://hg.mozilla.org/integration/autoland/',
+        'https://hg.mozilla.org/integration/autoland',
         'https://hg.mozilla.org/integration/b2g-inbound/',
         'https://hg.mozilla.org/integration/b2g-inbound',
         'https://hg.mozilla.org/integration/mozilla-inbound',
