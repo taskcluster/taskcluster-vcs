@@ -15,6 +15,7 @@ export default async function main(config, argv) {
 
     var clones = [
         'https://github.com/walac/gecko-dev',
+        'https://github.com/mozilla/build-tooltool',
         'https://github.com/lightsofapollo/build-mozharness',
         'https://hg.mozilla.org/build/mozharness',
         'https://hg.mozilla.org/build/tools',
