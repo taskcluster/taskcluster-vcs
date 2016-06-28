@@ -43,17 +43,13 @@ export default async function main(config, argv) {
         'https://hg.mozilla.org/integration/gaia-2_2r/',
         'https://hg.mozilla.org/integration/fx-team/',
         'https://hg.mozilla.org/integration/fx-team',
-        'https://git.mozilla.org/b2g/B2G.git',
         'https://hg.mozilla.org/integration/gaia-central',
         'https://hg.mozilla.org/integration/gaia-central/',
-        'https://git.mozilla.org/b2g/B2G',
         'https://github.com/mozilla-b2g/gaia',
         'https://github.com/mozilla-b2g/B2G',
         'https://github.com/mozilla-b2g/B2G-manifest',
         'https://github.com/mozilla-b2g/moztt',
         'https://github.com/mozilla/gecko-dev',
-        'https://git.mozilla.org/build/tooltool.git',
-        'https://git.mozilla.org/external/google/gerrit/git-repo.git',
         'https://hg.mozilla.org/projects/alder',
         'https://hg.mozilla.org/projects/alder/',
         'https://hg.mozilla.org/projects/cypress',
@@ -209,7 +205,7 @@ function generateRepoCacheTaskDefinition(emulator, type) {
     var date = new Date();
     var deadline = setDeadline(new Date(date.getTime()), 4);
     var repo = '';
-    var B2GUrl = 'https://git.mozilla.org/b2g/B2G';
+    var B2GUrl = 'https://github.com/mozilla-b2g/B2G';
 
     if (type === 'emulator_url') {
         repo = ["https://hg.mozilla.org/mozilla-central/raw-file/default/b2g/config", emulator, "sources.xml"].join('/');
