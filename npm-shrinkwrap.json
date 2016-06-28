@@ -1,6 +1,6 @@
 {
   "name": "taskcluster-vcs",
-  "version": "2.3.22",
+  "version": "2.3.38",
   "dependencies": {
     "6to5": {
       "version": "3.6.5",
