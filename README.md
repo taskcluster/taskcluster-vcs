@@ -10,8 +10,8 @@
 
 
 ```
-# Edit `Dockerfile` and `src/task.js` to update the version number.
-docker bulid -t taskcluster/taskcluster-vcs:$VERSION .
+# Edit `Dockerfile` and `src/cli/moz-cache.js` to update the version number.
+docker build -t taskcluster/taskcluster-vcs:$VERSION .
 docker login
 docker push taskcluster/taskcluster-vcs:$VERSION
 

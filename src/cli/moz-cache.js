@@ -179,7 +179,7 @@ function generateCloneTaskDefinition(repo) {
       deadline: deadline,
       scopes: ['queue:create-artifact:*', 'index:insert-task:tc-vcs.v1.clones.*'],
       payload: {
-        image: 'taskcluster/taskcluster-vcs:2.3.38',
+        image: 'taskcluster/taskcluster-vcs:2.3.39',
         command: params,
         maxRunTime: 3600,
         features: {
@@ -231,7 +231,7 @@ function generateRepoCacheTaskDefinition(emulator, type) {
         // TODO (garndt): Bug here with cloning android repos that happened sometime
         // between 2.3.24 and 2.3.29.  Since we are in the process of disabling these
         // jobs, putting this on a known good version for the time being should be sufficient.
-        image: 'taskcluster/taskcluster-vcs:2.3.24',
+        image: 'taskcluster/taskcluster-vcs:2.3.39',
         command: params,
         maxRunTime: 7200,
         features: {
