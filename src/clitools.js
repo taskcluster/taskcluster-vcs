@@ -76,7 +76,7 @@ export let arg = {
 
   expires(parser) {
     parser.addArgument(['--expires'], {
-      defaultValue: '30 days',
+      defaultValue: '1 year',
       type: (v) => {
         return new Date(Date.now() + ms(v));
       },
