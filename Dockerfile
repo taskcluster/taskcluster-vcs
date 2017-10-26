@@ -10,5 +10,5 @@ RUN git config --global user.email "taskcluster-vcs@example.nomail" && \
 # Install node
 RUN cd /usr/local/ && curl https://nodejs.org/dist/v0.12.4/node-v0.12.4-linux-x64.tar.gz | tar -xz --strip-components 1
 
-RUN npm install -g taskcluster-vcs@2.3.41 --no-optional
+RUN npm install -g taskcluster-vcs@2.3.42 --no-optional
 ENTRYPOINT ["tc-vcs"]

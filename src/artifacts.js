@@ -180,7 +180,9 @@ export default class Artifacts {
     options = Object.assign({
       taskId: process.env.TASK_ID,
       runId: process.env.RUN_ID,
-      expires: new Date(Date.now() + ms('1 year')),
+      // Task expiration is defaulted to 1 year from date of creation.
+      // Make artifact expiration 1 day less than task expiration.
+      expires: new Date(Date.now() + ms('364 days')),
       rank: Date.now()
     }, options);
 
