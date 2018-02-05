@@ -1,6 +1,6 @@
 {
   "name": "taskcluster-vcs",
-  "version": "2.3.42",
+  "version": "2.3.43",
   "description": "Version control tools for taskcluster images",
   "main": "./build/bin/tc-vcs",
   "preferGlobal": true,

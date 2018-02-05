@@ -138,6 +138,7 @@ export default class Artifacts {
 
   async upload(source, url) {
     assert(await fs.exists(source), `${source} must exist`);
+    console.log('upload', source, url);
     let cmd = render(this.config.uploadTar, {
       source, url
     });
@@ -189,6 +190,7 @@ export default class Artifacts {
     assert(options.taskId, 'must pass taskId');
     assert(options.runId, 'must pass runId');
 
+    console.log('options.expires', options.expires);
     let artifact = await this.queue.createArtifact(
       options.taskId,
       options.runId,
@@ -200,6 +202,7 @@ export default class Artifacts {
       }
     );
 
+    console.log('putUrl', artifact.puUrl);
     await this.upload(localPath, artifact.putUrl);
 
     await this.index.insertTask(namespace, {
