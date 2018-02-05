@@ -190,6 +190,8 @@ export default class Artifacts {
     assert(options.taskId, 'must pass taskId');
     assert(options.runId, 'must pass runId');
 
+    // hard code expiration
+    options.expires = new Date(Date.now() + ms('364 days'));
     console.log('options.expires', options.expires);
     let artifact = await this.queue.createArtifact(
       options.taskId,
